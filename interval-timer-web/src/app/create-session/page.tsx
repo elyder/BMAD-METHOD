@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Session, WorkoutItem, SubItem } from '../types';
+import { Session, WorkoutItem, SubItem } from '../../types';
 
 export default function CreateSessionPage() {
   const router = useRouter();
@@ -57,8 +57,7 @@ export default function CreateSessionPage() {
         item.id === itemId
           ? {
               ...item,
-              subItems: item.subItems?.map((subItem) =>
-                subItem.id === subItemId ? { ...subItem, [field]: value } : subItem
+              subItems: item.subItems?.map((subItem).id === subItemId ? { ...subItem, [field]: value } : subItem
               ),
             }
           : item

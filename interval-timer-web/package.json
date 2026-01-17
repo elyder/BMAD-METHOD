@@ -9,13 +9,14 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "autoprefixer": "^10.4.23",
     "next": "16.1.1",
     "react": "19.2.3",
     "react-dom": "19.2.3"
   },
   "devDependencies": {
     "@playwright/test": "^1.57.0",
-    "@tailwindcss/postcss": "^4",
+    "@tailwindcss/postcss": "^4.1.18",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

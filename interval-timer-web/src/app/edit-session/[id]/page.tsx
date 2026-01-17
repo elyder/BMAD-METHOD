@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { useSession } from '@/hooks/use-session';
-import { Session, WorkoutItem, SubItem } from '../../types';
+import { useSession } from '../../../hooks/use-session';
+import { Session, WorkoutItem, SubItem } from '../../../types';
 
 export default function EditSessionPage() {
   const router = useRouter();
