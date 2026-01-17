@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { Session, WorkoutItem, SubItem } from '../../types';
 import { colorPalette } from '../../colors';
 
@@ -218,8 +219,17 @@ export default function CreateSessionPage() {
               </div>
               <div className="flex-grow grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
                 <div className="flex flex-col">
-                  <h3 className="text-lg font-bold mb-2">{item.title}</h3>
-                  <div className="text-gray-400">{item.duration}</div>
+                  <label htmlFor={`itemTitle-${item.id}`} className="block text-sm font-bold mb-2">
+                    Title
+                  </label>
+                  <input
+                    type="text"
+                    id={`itemTitle-${item.id}`}
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline bg-white"
+                    value={item.title}
+                    onChange={(e) => handleItemChange(item.id, 'title', e.target.value)}
+                    placeholder="e.g., Warm-up"
+                  />
                 </div>
                 <div className="flex flex-col">
                   <label htmlFor={`itemDuration-${item.id}`} className="block text-sm font-bold mb-2">
@@ -346,12 +356,19 @@ export default function CreateSessionPage() {
           >
             Add Item
           </button>
-          <button
-            onClick={() => setShowSaveForm(true)}
-            className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
-          >
-            Save Session
-          </button>
+          <div className="space-x-4">
+            <Link href="/">
+              <button className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
+                Cancel
+              </button>
+            </Link>
+            <button
+              onClick={() => setShowSaveForm(true)}
+              className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+            >
+              Save Session
+            </button>
+          </div>
         </div>
       </div>
     </main>

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import Link from 'next/link';
 import { useSession } from '../../../hooks/use-session';
 import { Session, WorkoutItem, SubItem } from '../../../types';
 import { colorPalette } from '../../../colors';
@@ -347,12 +348,19 @@ export default function EditSessionPage() {
           >
             Add Item
           </button>
-          <button
-            onClick={saveSession}
-            className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
-          >
-            Save Session
-          </button>
+          <div className="space-x-4">
+            <Link href="/">
+              <button className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
+                Cancel
+              </button>
+            </Link>
+            <button
+              onClick={saveSession}
+              className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+            >
+              Save Session
+            </button>
+          </div>
         </div>
       </div>
     </main>
