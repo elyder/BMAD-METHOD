@@ -41,6 +41,7 @@ export default function EditSessionPage() {
                   id: Date.now().toString(),
                   title: 'New Sub-item',
                   duration: '00:00',
+                  disregardInLastRepetition: false,
                 },
               ],
             }
@@ -260,6 +261,12 @@ export default function EditSessionPage() {
                         value={subItem.duration}
                         onChange={(e) => handleSubItemChange(item.id, subItem.id, 'duration', e.target.value)}
                         placeholder="mm:ss"
+                      />
+                      <input
+                        type="color"
+                        className="shadow appearance-none border rounded w-full py-1 px-2 leading-tight focus:outline-none focus:shadow-outline bg-gray-600 h-8"
+                        value={subItem.color || item.color}
+                        onChange={(e) => handleSubItemChange(item.id, subItem.id, 'color', e.target.value)}
                       />
                       <button
                         onClick={() => deleteSubItem(item.id, subItem.id)}
