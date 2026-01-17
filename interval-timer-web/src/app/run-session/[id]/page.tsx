@@ -122,6 +122,14 @@ export default function RunSessionPage() {
   }, [isRunning, timeLeft, currentTaskIndex, allTasks, sessionStarted, endSession]);
 
   const startTimer = () => {
+    if (!sessionStarted) {
+      // Update lastRunAt in localStorage
+      const storedSessions = JSON.parse(localStorage.getItem('intervalTimerSessions') || '[]') as Session[];
+      const updatedSessions = storedSessions.map(s => 
+        s.id === sessionId ? { ...s, lastRunAt: Date.now() } : s
+      );
+      localStorage.setItem('intervalTimerSessions', JSON.stringify(updatedSessions));
+    }
     setIsRunning(true);
     setSessionStarted(true);
   };

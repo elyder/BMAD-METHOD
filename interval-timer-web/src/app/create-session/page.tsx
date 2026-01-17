@@ -135,6 +135,7 @@ export default function CreateSessionPage() {
       id: Date.now().toString(), // Unique ID for the session
       name: sessionName,
       items: workoutItems,
+      createdAt: Date.now(),
     };
 
     const existingSessions = JSON.parse(localStorage.getItem('intervalTimerSessions') || '[]') as Session[];

@@ -21,4 +21,6 @@ export interface Session {
   id: string;
   name: string;
   items: WorkoutItem[];
+  createdAt?: number;
+  lastRunAt?: number;
 }
