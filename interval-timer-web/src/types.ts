@@ -8,7 +8,10 @@ export interface Task {
   totalRepetitions?: number; // The total number of repetitions for the parent item
 }
 
-export type SubItem = Omit<Task, 'repetitions' | 'repetition' | 'color' | 'totalRepetitions'>;
+export type SubItem = Omit<Task, 'repetitions' | 'repetition' | 'color' | 'totalRepetitions'> & {
+  disregardInLastRepetition?: boolean;
+  color?: string;
+};
 
 export interface WorkoutItem extends Task {
   subItems?: SubItem[];

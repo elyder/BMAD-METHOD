@@ -55,12 +55,15 @@ export default function RunSessionPage() {
             tasks.push({ ...item, repetition: i, totalRepetitions: item.repetitions });
             if (item.subItems) {
               item.subItems.forEach(subItem => {
+                if (subItem.disregardInLastRepetition && i === item.repetitions) {
+                  return; // Skip this sub-item in the last repetition
+                }
                 tasks.push({
                   ...subItem,
                   repetitions: 1,
                   repetition: i,
                   totalRepetitions: item.repetitions,
-                  color: item.color, // Sub-items inherit color from parent
+                  color: subItem.color || item.color, // Sub-items inherit color from parent if not defined
                 });
               });
             }

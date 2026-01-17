@@ -165,7 +165,7 @@ export default function EditSessionPage() {
             <input
               type="text"
               id="sessionName"
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline bg-gray-700"
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline bg-white"
               value={sessionName}
               onChange={(e) => setSessionName(e.target.value)}
               placeholder="e.g., My Morning Routine"
@@ -188,7 +188,7 @@ export default function EditSessionPage() {
                     <input
                       type="number"
                       id={`itemRepetitions-${item.id}`}
-                      className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline bg-gray-600"
+                      className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline bg-white"
                       value={item.repetitions}
                       onChange={(e) => handleItemChange(item.id, 'repetitions', parseInt(e.target.value) || 1)}
                       min="1"
@@ -210,7 +210,7 @@ export default function EditSessionPage() {
                   <input
                     type="text"
                     id={`itemTitle-${item.id}`}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline bg-gray-600"
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline bg-white"
                     value={item.title}
                     onChange={(e) => handleItemChange(item.id, 'title', e.target.value)}
                     placeholder="e.g., Warm-up"
@@ -223,7 +223,7 @@ export default function EditSessionPage() {
                   <input
                     type="text"
                     id={`itemDuration-${item.id}`}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline bg-gray-600"
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline bg-white"
                     value={item.duration}
                     onChange={(e) => handleItemChange(item.id, 'duration', e.target.value)}
                     placeholder="e.g., 05:00"
@@ -236,7 +236,7 @@ export default function EditSessionPage() {
                   <input
                     type="color"
                     id={`itemColor-${item.id}`}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline bg-gray-600 h-10"
+                    className="shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline bg-white h-10"
                     value={item.color}
                     onChange={(e) => handleItemChange(item.id, 'color', e.target.value)}
                   />
@@ -250,21 +250,21 @@ export default function EditSessionPage() {
                     <div className="flex items-center space-x-2">
                       <input
                         type="text"
-                        className="shadow appearance-none border rounded w-full py-1 px-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline bg-gray-600"
+                        className="shadow appearance-none border rounded w-full py-1 px-2 text-black leading-tight focus:outline-none focus:shadow-outline bg-white"
                         value={subItem.title}
                         onChange={(e) => handleSubItemChange(item.id, subItem.id, 'title', e.target.value)}
                         placeholder="Sub-item title"
                       />
                       <input
                         type="text"
-                        className="shadow appearance-none border rounded w-full py-1 px-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline bg-gray-600"
+                        className="shadow appearance-none border rounded w-full py-1 px-2 text-black leading-tight focus:outline-none focus:shadow-outline bg-white"
                         value={subItem.duration}
                         onChange={(e) => handleSubItemChange(item.id, subItem.id, 'duration', e.target.value)}
                         placeholder="mm:ss"
                       />
                       <input
                         type="color"
-                        className="shadow appearance-none border rounded w-full py-1 px-2 leading-tight focus:outline-none focus:shadow-outline bg-gray-600 h-8"
+                        className="shadow appearance-none border rounded w-full py-1 px-2 leading-tight focus:outline-none focus:shadow-outline bg-white h-8"
                         value={subItem.color || item.color}
                         onChange={(e) => handleSubItemChange(item.id, subItem.id, 'color', e.target.value)}
                       />
