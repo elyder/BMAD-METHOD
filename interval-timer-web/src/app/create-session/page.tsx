@@ -99,20 +99,25 @@ export default function CreateSessionPage() {
   const calculateTotalDuration = () => {
     let totalSeconds = 0;
     workoutItems.forEach((item) => {
-      let itemTotalSeconds = 0;
-      if (item.duration) {
-        const [minutes, seconds] = item.duration.split(':').map(Number);
-        itemTotalSeconds += minutes * 60 + seconds;
+      for (let i = 1; i <= item.repetitions; i++) {
+        let itemTotalSeconds = 0;
+        if (item.duration) {
+          const [minutes, seconds] = item.duration.split(':').map(Number);
+          itemTotalSeconds += minutes * 60 + seconds;
+        }
+        if (item.subItems) {
+          item.subItems.forEach((subItem) => {
+            if (subItem.disregardInLastRepetition && i === item.repetitions) {
+              return; // Skip this sub-item in the last repetition
+            }
+            if (subItem.duration) {
+              const [minutes, seconds] = subItem.duration.split(':').map(Number);
+              itemTotalSeconds += minutes * 60 + seconds;
+            }
+          });
+        }
+        totalSeconds += itemTotalSeconds;
       }
-      if (item.subItems) {
-        item.subItems.forEach((subItem) => {
-          if (subItem.duration) {
-            const [minutes, seconds] = subItem.duration.split(':').map(Number);
-            itemTotalSeconds += minutes * 60 + seconds;
-          }
-        });
-      }
-      totalSeconds += itemTotalSeconds * item.repetitions;
     });
 
     const totalMinutes = Math.floor(totalSeconds / 60);
