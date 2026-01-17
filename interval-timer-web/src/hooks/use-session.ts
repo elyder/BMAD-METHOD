@@ -7,7 +7,12 @@ export function useSession(sessionId: string) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (sessionId && typeof window !== 'undefined') {
+    if (typeof window !== 'undefined') {
+      if (!sessionId) {
+        setLoading(false);
+        return;
+      }
+      
       try {
         const storedSessions = JSON.parse(localStorage.getItem('intervalTimerSessions') || '[]') as Session[];
         const foundSession = storedSessions.find(s => s.id === sessionId);

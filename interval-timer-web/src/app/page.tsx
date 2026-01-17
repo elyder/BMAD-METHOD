@@ -161,7 +161,7 @@ export default function Home() {
                     {session.lastRunAt && <p className="text-xs text-gray-500 mt-1">Last run: {new Date(session.lastRunAt).toLocaleDateString()}</p>}
                   </div>
                   <div className="flex space-x-2">
-                    <Link href={`/edit-session/${session.id}`}>
+                    <Link href={`/edit-session?id=${session.id}`}>
                       <button className="bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded transition-colors">
                         Edit
                       </button>
@@ -172,7 +172,7 @@ export default function Home() {
                     >
                       Delete
                     </button>
-                    <Link href={`/run-session/${session.id}`}>
+                    <Link href={`/run-session?id=${session.id}`}>
                       <button className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded transition-colors ml-2 shadow-lg">
                         Run
                       </button>

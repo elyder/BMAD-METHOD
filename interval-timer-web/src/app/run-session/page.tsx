@@ -1,14 +1,14 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useState, useEffect, useRef, useCallback, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { formatTime, parseTimeToSeconds } from '@/lib/time-utils';
 import { Session, WorkoutItem, SubItem, Task } from '../../types';
 
-export default function RunSessionPage() {
+function RunSessionContent() {
   const router = useRouter();
-  const params = useParams();
-  const sessionId = params.id as string;
+  const searchParams = useSearchParams();
+  const sessionId = searchParams.get('id');
 
   const [currentSession, setCurrentSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
@@ -169,7 +169,7 @@ export default function RunSessionPage() {
     );
   }
 
-  if (!currentSession) {
+  if (!currentSession || !sessionId) {
     return (
       <main className="flex min-h-screen flex-col items-center justify-center p-24 bg-gray-900 text-white">
         <h1 className="text-4xl font-bold">Session not found.</h1>
@@ -265,4 +265,12 @@ export default function RunSessionPage() {
       </div>
     </main>
   );
+}
+
+export default function RunSessionPage() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <RunSessionContent />
+        </Suspense>
+    );
 }

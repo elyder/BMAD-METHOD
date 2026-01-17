@@ -1,18 +1,18 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useState, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { useSession } from '../../../hooks/use-session';
-import { Session, WorkoutItem, SubItem } from '../../../types';
-import { colorPalette } from '../../../colors';
+import { useSession } from '../../hooks/use-session';
+import { Session, WorkoutItem, SubItem } from '../../types';
+import { colorPalette } from '../../colors';
 
-export default function EditSessionPage() {
+function EditSessionContent() {
   const router = useRouter();
-  const params = useParams();
-  const sessionId = params.id as string;
+  const searchParams = useSearchParams();
+  const sessionId = searchParams.get('id');
 
-  const { session, loading, error } = useSession(sessionId);
+  const { session, loading, error } = useSession(sessionId || '');
 
   const [sessionName, setSessionName] = useState('');
   const [sessionDetails, setSessionDetails] = useState('');
@@ -155,10 +155,15 @@ export default function EditSessionPage() {
     );
   }
 
-  if (error) {
+  if (error || !sessionId) {
     return (
       <main className="flex min-h-screen flex-col items-center justify-center p-24 bg-gray-900 text-white">
-        <h1 className="text-4xl font-bold text-red-500">Error: {error}</h1>
+        <h1 className="text-4xl font-bold text-red-500">Error: {error || 'No Session ID provided'}</h1>
+        <Link href="/">
+            <button className="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                Back to Home
+            </button>
+        </Link>
       </main>
     );
   }
@@ -227,7 +232,7 @@ export default function EditSessionPage() {
                 </button>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr_2fr] gap-4 mb-2 items-end">
+              <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr_1fr] gap-4 mb-2 items-end">
                 <div className="flex flex-col">
                   <label htmlFor={`itemTitle-${item.id}`} className="block text-sm font-bold mb-2 text-blue-300 text-left">
                     Title
@@ -383,4 +388,12 @@ export default function EditSessionPage() {
       </div>
     </main>
   );
+}
+
+export default function EditSessionPage() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <EditSessionContent />
+        </Suspense>
+    );
 }
