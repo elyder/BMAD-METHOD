@@ -12,8 +12,6 @@ export default function RunSessionPage() {
 
   const [currentSession, setCurrentSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
-  const [currentWorkoutItemIndex, setCurrentWorkoutItemIndex] = useState(0);
-  const [currentRepetition, setCurrentRepetition] = useState(1);
   const [timeLeft, setTimeLeft] = useState(0); // Time left for the current item
   const [isRunning, setIsRunning] = useState(false);
   const [sessionStarted, setSessionStarted] = useState(false);
@@ -36,6 +34,10 @@ export default function RunSessionPage() {
     router.push('/');
   }, [router]);
 
+  // A new state for the flattened list of all tasks
+  const [allTasks, setAllTasks] = useState<(WorkoutItem | SubItem)[]>([]);
+  const [currentTaskIndex, setCurrentTaskIndex] = useState(0);
+
   // Load session data and initial setup
   useEffect(() => {
     if (sessionId && typeof window !== 'undefined') {
@@ -45,17 +47,26 @@ export default function RunSessionPage() {
       if (sessionToRun) {
         setCurrentSession(sessionToRun);
 
-        // Calculate total session duration
-        let totalDuration = 0;
+        // Flatten the workout items and sub-items into a single array
+        const tasks: (WorkoutItem | SubItem)[] = [];
         sessionToRun.items.forEach(item => {
-          totalDuration += parseTimeToSeconds(item.duration) * item.repetitions;
+          for (let i = 0; i < item.repetitions; i++) {
+            tasks.push(item);
+            if (item.subItems) {
+              tasks.push(...item.subItems);
+            }
+          }
         });
+        setAllTasks(tasks);
+        
+        // Calculate total session duration
+        const totalDuration = tasks.reduce((total, task) => total + parseTimeToSeconds(task.duration), 0);
         setTotalSessionDuration(totalDuration);
         setTotalSessionTimeLeft(totalDuration);
 
         // Set initial time for the first item
-        if (sessionToRun.items.length > 0) {
-          setTimeLeft(parseTimeToSeconds(sessionToRun.items[0].duration));
+        if (tasks.length > 0) {
+          setTimeLeft(parseTimeToSeconds(tasks[0].duration));
         }
       } else {
         alert('Session not found!');
@@ -72,21 +83,14 @@ export default function RunSessionPage() {
         setTimeLeft(prev => prev - 1);
         setTotalSessionTimeLeft(prev => prev - 1);
       }, 1000);
-    } else if (timeLeft === 0 && currentSession && sessionStarted) {
-      // Move to next repetition or next item
+    } else if (timeLeft === 0 && sessionStarted) {
+      // Move to next task
       clearInterval(Number(intervalRef.current));
 
-      const currentItem = currentSession.items[currentWorkoutItemIndex];
-
-      if (currentRepetition < currentItem.repetitions) {
-        // Next repetition of the current item
-        setCurrentRepetition(prev => prev + 1);
-        setTimeLeft(parseTimeToSeconds(currentItem.duration));
-      } else if (currentWorkoutItemIndex < currentSession.items.length - 1) {
-        // Next item
-        setCurrentWorkoutItemIndex(prev => prev + 1);
-        setCurrentRepetition(1); // Reset repetition for new item
-        setTimeLeft(parseTimeToSeconds(currentSession.items[currentWorkoutItemIndex + 1].duration));
+      if (currentTaskIndex < allTasks.length - 1) {
+        const nextTaskIndex = currentTaskIndex + 1;
+        setCurrentTaskIndex(nextTaskIndex);
+        setTimeLeft(parseTimeToSeconds(allTasks[nextTaskIndex].duration));
       } else {
         // Session complete
         endSession(true);
@@ -100,7 +104,7 @@ export default function RunSessionPage() {
         clearInterval(Number(intervalRef.current));
       }
     };
-  }, [isRunning, timeLeft, currentWorkoutItemIndex, currentRepetition, currentSession, sessionStarted, endSession]);
+  }, [isRunning, timeLeft, currentTaskIndex, allTasks, sessionStarted, endSession]);
 
   const startTimer = () => {
     setIsRunning(true);
@@ -115,27 +119,20 @@ export default function RunSessionPage() {
     if (!currentSession) return;
     clearInterval(Number(intervalRef.current));
 
-    const currentItem = currentSession.items[currentWorkoutItemIndex];
+    setTotalSessionTimeLeft(prev => prev - timeLeft); // Subtract remaining time from total
 
-    if (currentRepetition < currentItem.repetitions) {
-      // Skip to next repetition of the current item
-      setCurrentRepetition(prev => prev + 1);
-      setTimeLeft(parseTimeToSeconds(currentItem.duration));
-      setTotalSessionTimeLeft(prev => prev - timeLeft); // Subtract remaining time from total
-    } else if (currentWorkoutItemIndex < currentSession.items.length - 1) {
-      // Skip to next item
-      setTotalSessionTimeLeft(prev => prev - timeLeft); // Subtract remaining time from total
-      setCurrentWorkoutItemIndex(prev => prev + 1);
-      setCurrentRepetition(1);
-      setTimeLeft(parseTimeToSeconds(currentSession.items[currentWorkoutItemIndex + 1].duration));
+    if (currentTaskIndex < allTasks.length - 1) {
+      const nextTaskIndex = currentTaskIndex + 1;
+      setCurrentTaskIndex(nextTaskIndex);
+      setTimeLeft(parseTimeToSeconds(allTasks[nextTaskIndex].duration));
     } else {
-      // Already at the last item and last repetition, end session
+      // Already at the last item, end session
       endSession(true);
     }
   };
 
-  const currentItem = currentSession?.items[currentWorkoutItemIndex];
-  const upcomingItem = currentSession?.items[currentWorkoutItemIndex + 1];
+  const currentItem = allTasks[currentTaskIndex];
+  const upcomingItem = allTasks[currentTaskIndex + 1];
 
   const progressPercentage = totalSessionDuration > 0 ? ((totalSessionDuration - totalSessionTimeLeft) / totalSessionDuration) * 100 : 0;
 
@@ -158,7 +155,7 @@ export default function RunSessionPage() {
   return (
     <main
       className="flex min-h-screen flex-col items-center justify-center p-4 md:p-24 text-white transition-colors duration-500"
-      style={{ backgroundColor: currentItem?.color || '#1a202c' }} // Default background if color is not set
+      style={{ backgroundColor: (currentItem && 'color' in currentItem) ? currentItem.color : '#1a202c' }}
     >
       {/* Progress Bar at the top */}
       <div className="fixed top-0 left-0 w-full h-2 bg-gray-700">
@@ -176,9 +173,6 @@ export default function RunSessionPage() {
             <h2 className="text-3xl font-semibold">
               Current Task: <span className="text-blue-400">{currentItem.title}</span>
             </h2>
-            {currentItem.repetitions > 1 && (
-              <p className="text-xl mt-2">Repetition: {currentRepetition} of {currentItem.repetitions}</p>
-            )}
             <p className="text-8xl font-extrabold mt-4">{formatTime(timeLeft)}</p>
           </div>
         )}
