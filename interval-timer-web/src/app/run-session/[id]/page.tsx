@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { formatTime, parseTimeToSeconds } from '@/lib/time-utils';
-import { Session, WorkoutItem } from '../../types';
+import { Session, WorkoutItem, SubItem, Task } from '../../types';
 
 export default function RunSessionPage() {
   const router = useRouter();
@@ -36,7 +36,7 @@ export default function RunSessionPage() {
   }, [router]);
 
   // A new state for the flattened list of all tasks
-  const [allTasks, setAllTasks] = useState<(WorkoutItem | SubItem)[]>([]);
+  const [allTasks, setAllTasks] = useState<Task[]>([]);
   const [currentTaskIndex, setCurrentTaskIndex] = useState(0);
 
   // Load session data and initial setup
@@ -49,12 +49,20 @@ export default function RunSessionPage() {
         setCurrentSession(sessionToRun);
 
         // Flatten the workout items and sub-items into a single array
-        const tasks: (WorkoutItem | SubItem)[] = [];
+        const tasks: Task[] = [];
         sessionToRun.items.forEach(item => {
-          for (let i = 0; i < item.repetitions; i++) {
-            tasks.push(item);
+          for (let i = 1; i <= item.repetitions; i++) {
+            tasks.push({ ...item, repetition: i, totalRepetitions: item.repetitions });
             if (item.subItems) {
-              tasks.push(...item.subItems);
+              item.subItems.forEach(subItem => {
+                tasks.push({
+                  ...subItem,
+                  repetitions: 1,
+                  repetition: i,
+                  totalRepetitions: item.repetitions,
+                  color: item.color, // Sub-items inherit color from parent
+                });
+              });
             }
           }
         });
@@ -92,7 +100,8 @@ export default function RunSessionPage() {
       if (currentTaskIndex < allTasks.length - 1) {
         const nextTaskIndex = currentTaskIndex + 1;
         setCurrentTaskIndex(nextTaskIndex);
-        setTimeLeft(parseTimeToSeconds(allTasks[nextTaskIndex].duration));
+        const nextTask = allTasks[nextTaskIndex];
+        setTimeLeft(parseTimeToSeconds(nextTask.duration));
         setElapsedTimeInItem(0);
       } else {
         // Session complete
@@ -127,7 +136,8 @@ export default function RunSessionPage() {
     if (currentTaskIndex < allTasks.length - 1) {
       const nextTaskIndex = currentTaskIndex + 1;
       setCurrentTaskIndex(nextTaskIndex);
-      setTimeLeft(parseTimeToSeconds(allTasks[nextTaskIndex].duration));
+      const nextTask = allTasks[nextTaskIndex];
+      setTimeLeft(parseTimeToSeconds(nextTask.duration));
       setElapsedTimeInItem(0);
     } else {
       // Already at the last item, end session
@@ -159,7 +169,7 @@ export default function RunSessionPage() {
   return (
     <main
       className="flex min-h-screen flex-col items-center justify-center p-4 md:p-24 text-white transition-colors duration-500"
-      style={{ backgroundColor: (currentItem && 'color' in currentItem) ? currentItem.color : '#1a202c' }}
+      style={{ backgroundColor: currentItem?.color || '#1a202c' }}
     >
       {/* Progress Bar at the top */}
       <div className="fixed top-0 left-0 w-full h-2 bg-gray-700">
@@ -177,10 +187,15 @@ export default function RunSessionPage() {
             <h2 className="text-3xl font-semibold">
               Current Task: <span className="text-blue-400">{currentItem.title}</span>
             </h2>
+            {currentItem.totalRepetitions > 1 && (
+              <p className="text-xl mt-2">
+                {currentItem.repetition} of {currentItem.totalRepetitions}
+              </p>
+            )}
             <p className="text-8xl font-extrabold mt-4">{formatTime(timeLeft)}</p>
           </div>
         )}
-
+        
         {/* Controls */}
         <div className="flex justify-center space-x-4 mt-8">
           {!sessionStarted && (
