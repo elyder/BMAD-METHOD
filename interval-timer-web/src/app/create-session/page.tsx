@@ -2,13 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Session, WorkoutItem, SubItem } from '../types';
+import { colorPalette } from '../../colors';
 
 export default function CreateSessionPage() {
   const router = useRouter();
   const [sessionName, setSessionName] = useState('');
   const [showSaveForm, setShowSaveForm] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+  const [showColorPalette, setShowColorPalette] = useState<string | null>(null);
   const [workoutItems, setWorkoutItems] = useState<WorkoutItem[]>([
     { id: '1', title: 'Warm-up', duration: '10:00', color: '#ffcc00', repetitions: 1 },
     { id: '2', title: 'Actions', duration: '30:00', color: '#66cc33', repetitions: 1 },
@@ -235,13 +236,34 @@ export default function CreateSessionPage() {
                   <label htmlFor={`itemColor-${item.id}`} className="block text-sm font-bold mb-2">
                     Background Color
                   </label>
-                  <input
-                    type="color"
-                    id={`itemColor-${item.id}`}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline bg-white h-10"
-                    value={item.color}
-                    onChange={(e) => handleItemChange(item.id, 'color', e.target.value)}
-                  />
+                  <div className="flex items-center space-x-2">
+                    <div
+                      className="w-10 h-10 rounded"
+                      style={{ backgroundColor: item.color }}
+                      onClick={() => {
+                        const newItems = [...workoutItems];
+                        const currentItem = newItems.find((i) => i.id === item.id);
+                        if (currentItem) {
+                          setShowColorPalette(showColorPalette === item.id ? null : item.id);
+                        }
+                      }}
+                    ></div>
+                    {showColorPalette === item.id && (
+                      <div className="grid grid-cols-8 gap-1">
+                        {colorPalette.map((color) => (
+                          <div
+                            key={color}
+                            className="w-6 h-6 rounded"
+                            style={{ backgroundColor: color }}
+                            onClick={() => {
+                              handleItemChange(item.id, 'color', color);
+                              setShowColorPalette(null);
+                            }}
+                          ></div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -264,12 +286,32 @@ export default function CreateSessionPage() {
                         onChange={(e) => handleSubItemChange(item.id, subItem.id, 'duration', e.target.value)}
                         placeholder="mm:ss"
                       />
-                      <input
-                        type="color"
-                        className="shadow appearance-none border rounded w-full py-1 px-2 leading-tight focus:outline-none focus:shadow-outline bg-white h-8"
-                        value={subItem.color || item.color}
-                        onChange={(e) => handleSubItemChange(item.id, subItem.id, 'color', e.target.value)}
-                      />
+                      <div
+                        className="w-8 h-8 rounded"
+                        style={{ backgroundColor: subItem.color || item.color }}
+                        onClick={() => {
+                          const newItems = [...workoutItems];
+                          const currentItem = newItems.find((i) => i.id === item.id);
+                          if (currentItem) {
+                            setShowColorPalette(showColorPalette === subItem.id ? null : subItem.id);
+                          }
+                        }}
+                      ></div>
+                      {showColorPalette === subItem.id && (
+                        <div className="grid grid-cols-8 gap-1">
+                          {colorPalette.map((color) => (
+                            <div
+                              key={color}
+                              className="w-6 h-6 rounded"
+                              style={{ backgroundColor: color }}
+                              onClick={() => {
+                                handleSubItemChange(item.id, subItem.id, 'color', color);
+                                setShowColorPalette(null);
+                              }}
+                            ></div>
+                          ))}
+                        </div>
+                      )}
                       <button
                         onClick={() => deleteSubItem(item.id, subItem.id)}
                         className="bg-red-600 hover:bg-red-800 text-white font-bold py-1 px-2 rounded"
