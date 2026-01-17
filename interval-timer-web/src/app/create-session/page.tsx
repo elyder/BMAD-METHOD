@@ -9,7 +9,7 @@ import { colorPalette } from '../../colors';
 export default function CreateSessionPage() {
   const router = useRouter();
   const [sessionName, setSessionName] = useState('');
-  const [showSaveForm, setShowSaveForm] = useState(false);
+  const [sessionDetails, setSessionDetails] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [workoutItems, setWorkoutItems] = useState<WorkoutItem[]>([
     { id: '1', title: 'Warm-up', duration: '10:00', color: '#ef4444', repetitions: 1 },
@@ -131,9 +131,15 @@ export default function CreateSessionPage() {
   };
 
   const saveSession = () => {
+    if (!sessionName.trim()) {
+      alert('Please enter a session name.');
+      return;
+    }
+
     const newSession: Session = {
       id: Date.now().toString(), // Unique ID for the session
       name: sessionName,
+      details: sessionDetails,
       items: workoutItems,
       createdAt: Date.now(),
     };
@@ -143,14 +149,6 @@ export default function CreateSessionPage() {
     localStorage.setItem('intervalTimerSessions', JSON.stringify(updatedSessions));
 
     setSuccessMessage('Session saved successfully!');
-  };
-
-  const handleSave = () => {
-    if (!sessionName.trim()) {
-      alert('Please enter a session name.');
-      return;
-    }
-    saveSession();
   };
 
   return (
@@ -165,31 +163,35 @@ export default function CreateSessionPage() {
         )}
 
         <div className="bg-gray-800 p-8 rounded-lg shadow-lg mb-8">
-          <div className="text-xl font-bold mb-4">
+          <div className="mb-4">
+            <label htmlFor="sessionName" className="block text-sm font-bold mb-2">
+              Session Name
+            </label>
+            <input
+              type="text"
+              id="sessionName"
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline bg-white"
+              value={sessionName}
+              onChange={(e) => setSessionName(e.target.value)}
+              placeholder="e.g., Morning Yoga"
+            />
+          </div>
+          <div className="mb-4">
+            <label htmlFor="sessionDetails" className="block text-sm font-bold mb-2">
+              Session Details (Optional)
+            </label>
+            <textarea
+              id="sessionDetails"
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline bg-white"
+              value={sessionDetails}
+              onChange={(e) => setSessionDetails(e.target.value)}
+              placeholder="Describe your session..."
+              rows={2}
+            />
+          </div>
+          <div className="text-xl font-bold">
             Total Time: {calculateTotalDuration()}
           </div>
-
-          {showSaveForm && (
-            <div className="mb-4">
-              <label htmlFor="sessionName" className="block text-sm font-bold mb-2">
-                Session Name
-              </label>
-              <input
-                type="text"
-                id="sessionName"
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline bg-white"
-                value={sessionName}
-                onChange={(e) => setSessionName(e.target.value)}
-                placeholder="Session Name"
-              />
-              <button
-                onClick={handleSave}
-                className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mt-4"
-              >
-                Save
-              </button>
-            </div>
-          )}
         </div>
 
         <div className="space-y-8">
@@ -368,7 +370,7 @@ export default function CreateSessionPage() {
               </button>
             </Link>
             <button
-              onClick={() => setShowSaveForm(true)}
+              onClick={saveSession}
               className="bg-green-600 hover:bg-green-800 text-white font-bold py-3 px-8 rounded-lg shadow-lg transform transition active:scale-95"
             >
               Save Session

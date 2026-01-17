@@ -154,8 +154,9 @@ export default function Home() {
             ) : (
               sortedSessions.map((session) => (
                 <div key={session.id} className="bg-gray-800 p-6 rounded-lg flex flex-col md:flex-row justify-between items-center shadow-md hover:bg-gray-750 transition-colors">
-                  <div className="mb-4 md:mb-0">
+                  <div className="mb-4 md:mb-0 text-left w-full md:w-auto">
                     <h3 className="text-2xl font-bold text-blue-400">{session.name}</h3>
+                    {session.details && <p className="text-sm text-gray-300 mt-1 mb-2 max-w-lg">{session.details}</p>}
                     <p className="text-gray-400">Total time: <span className="font-mono text-white">{calculateTotalDuration(session.items)}</span></p>
                     {session.lastRunAt && <p className="text-xs text-gray-500 mt-1">Last run: {new Date(session.lastRunAt).toLocaleDateString()}</p>}
                   </div>

@@ -15,6 +15,7 @@ export default function EditSessionPage() {
   const { session, loading, error } = useSession(sessionId);
 
   const [sessionName, setSessionName] = useState('');
+  const [sessionDetails, setSessionDetails] = useState('');
   const [workoutItems, setWorkoutItems] = useState<WorkoutItem[]>([]);
   const [activeColorPicker, setActiveColorPicker] = useState<string | null>(null);
 
@@ -22,6 +23,7 @@ export default function EditSessionPage() {
   useEffect(() => {
     if (session) {
       setSessionName(session.name);
+      setSessionDetails(session.details || '');
       setWorkoutItems(session.items);
     }
   }, [session]);
@@ -137,7 +139,7 @@ export default function EditSessionPage() {
 
     const storedSessions = JSON.parse(localStorage.getItem('intervalTimerSessions') || '[]') as Session[];
     const updatedSessions = storedSessions.map(s =>
-      s.id === sessionId ? { ...s, name: sessionName, items: workoutItems } : s
+      s.id === sessionId ? { ...s, name: sessionName, details: sessionDetails, items: workoutItems } : s
     );
 
     localStorage.setItem('intervalTimerSessions', JSON.stringify(updatedSessions));
@@ -178,6 +180,19 @@ export default function EditSessionPage() {
               value={sessionName}
               onChange={(e) => setSessionName(e.target.value)}
               placeholder="e.g., My Morning Routine"
+            />
+          </div>
+          <div className="mb-4">
+            <label htmlFor="sessionDetails" className="block text-sm font-bold mb-2">
+              Session Details (Optional)
+            </label>
+            <textarea
+              id="sessionDetails"
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline bg-white"
+              value={sessionDetails}
+              onChange={(e) => setSessionDetails(e.target.value)}
+              placeholder="e.g., High intensity interval training for cardio"
+              rows={3}
             />
           </div>
           <div className="text-xl font-bold mb-4">
@@ -290,7 +305,7 @@ export default function EditSessionPage() {
                   <div className="flex flex-col relative">
                     <div className="flex items-center gap-2">
                         <div
-                        className="w-10 h-10 rounded cursor-pointer border-2 border-white shadow-inner"
+                        className="w-10 h-10 rounded cursor-pointer border-2 border-white shadow-inner flex-grow"
                         style={{ backgroundColor: subItem.color || item.color }}
                         onClick={() => setActiveColorPicker(activeColorPicker === subItem.id ? null : subItem.id)}
                         />

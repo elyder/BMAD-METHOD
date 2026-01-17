@@ -183,11 +183,16 @@ export default function RunSessionPage() {
       style={{ backgroundColor: currentItem?.color || '#1a202c' }}
     >
       {/* Progress Bar at the top */}
-      <div className="fixed top-0 left-0 w-full h-2 bg-gray-700">
+      <div className="fixed top-0 left-0 w-full h-8 bg-gray-700 z-50">
         <div
-          className="h-full bg-blue-500 transition-all duration-1000 ease-linear"
+          className="h-full bg-blue-500 transition-all duration-1000 ease-linear relative"
           style={{ width: `${progressPercentage}%` }}
         ></div>
+        <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center">
+          <span className="text-white font-bold text-sm drop-shadow-md">
+            {formatTime(totalSessionTimeLeft)}
+          </span>
+        </div>
       </div>
 
       <div className="w-full max-w-4xl text-center">

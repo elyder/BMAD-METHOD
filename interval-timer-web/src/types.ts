@@ -20,6 +20,7 @@ export interface WorkoutItem extends Task {
 export interface Session {
   id: string;
   name: string;
+  details?: string;
   items: WorkoutItem[];
   createdAt?: number;
   lastRunAt?: number;
