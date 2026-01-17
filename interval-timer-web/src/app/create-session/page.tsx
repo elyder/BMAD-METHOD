@@ -221,7 +221,7 @@ export default function CreateSessionPage() {
                 </button>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-2 items-end">
+              <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr_2fr] gap-4 mb-2 items-end">
                 <div className="flex flex-col">
                   <label htmlFor={`itemTitle-${item.id}`} className="block text-sm font-bold mb-2 text-blue-300 text-left">
                     Title
@@ -237,7 +237,7 @@ export default function CreateSessionPage() {
                 </div>
                 <div className="flex flex-col">
                   <label htmlFor={`itemDuration-${item.id}`} className="block text-sm font-bold mb-2 text-blue-300 text-left">
-                    Duration (mm:ss)
+                    Duration
                   </label>
                   <input
                     type="text"
@@ -245,7 +245,7 @@ export default function CreateSessionPage() {
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline bg-white"
                     value={item.duration}
                     onChange={(e) => handleItemChange(item.id, 'duration', e.target.value)}
-                    placeholder="e.g., 05:00"
+                    placeholder="mm:ss"
                   />
                 </div>
                 <div className="flex flex-col relative items-start">
@@ -277,7 +277,7 @@ export default function CreateSessionPage() {
 
               {/* Sub-items Rows */}
               {item.subItems?.map((subItem, index) => (
-                <div key={subItem.id} className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-2 items-center">
+                <div key={subItem.id} className="grid grid-cols-1 md:grid-cols-[2fr_1fr_2fr] gap-4 mb-2 items-center">
                   <div className="flex flex-col">
                     <input
                       type="text"
@@ -299,13 +299,27 @@ export default function CreateSessionPage() {
                   <div className="flex flex-col relative">
                     <div className="flex items-center gap-2">
                         <div
-                        className="w-10 h-10 rounded cursor-pointer border-2 border-white shadow-inner"
+                        className="w-10 h-10 rounded cursor-pointer border-2 border-white shadow-inner flex-grow-0 flex-shrink-0"
                         style={{ backgroundColor: subItem.color || item.color }}
                         onClick={() => setActiveColorPicker(activeColorPicker === subItem.id ? null : subItem.id)}
                         />
+                        <div className="flex items-center gap-1 bg-gray-800 p-1 rounded border border-gray-600">
+                          <input
+                            type="checkbox"
+                            id={`disregard-${subItem.id}`}
+                            checked={subItem.disregardInLastRepetition}
+                            onChange={(e) =>
+                              handleSubItemChange(item.id, subItem.id, 'disregardInLastRepetition', e.target.checked)
+                            }
+                            className="h-4 w-4 cursor-pointer accent-blue-500"
+                          />
+                          <label htmlFor={`disregard-${subItem.id}`} className="text-[10px] uppercase font-bold text-gray-400 cursor-pointer whitespace-nowrap">
+                            Disregard last
+                          </label>
+                        </div>
                         <button
                             onClick={() => deleteSubItem(item.id, subItem.id)}
-                            className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-3 rounded text-sm h-10"
+                            className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-3 rounded text-sm h-10 ml-auto"
                         >
                             X
                         </button>
@@ -326,23 +340,6 @@ export default function CreateSessionPage() {
                       </div>
                     )}
                   </div>
-                  {/* Disregard Checkbox Row */}
-                  {index === item.subItems!.length - 1 && item.repetitions > 1 && (
-                      <div className="col-span-1 md:col-span-3 flex items-center mt-1">
-                        <input
-                          type="checkbox"
-                          id={`disregard-${subItem.id}`}
-                          checked={subItem.disregardInLastRepetition}
-                          onChange={(e) =>
-                            handleSubItemChange(item.id, subItem.id, 'disregardInLastRepetition', e.target.checked)
-                          }
-                          className="mr-2 h-4 w-4"
-                        />
-                        <label htmlFor={`disregard-${subItem.id}`} className="text-sm text-gray-300">
-                          Disregard in last repetition
-                        </label>
-                      </div>
-                    )}
                 </div>
               ))}
 
