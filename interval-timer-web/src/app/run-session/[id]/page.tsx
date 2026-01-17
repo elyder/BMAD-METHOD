@@ -17,6 +17,7 @@ export default function RunSessionPage() {
   const [sessionStarted, setSessionStarted] = useState(false);
   const [totalSessionTimeLeft, setTotalSessionTimeLeft] = useState(0);
   const [totalSessionDuration, setTotalSessionDuration] = useState(0);
+  const [elapsedTimeInItem, setElapsedTimeInItem] = useState(0);
 
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -82,6 +83,7 @@ export default function RunSessionPage() {
       intervalRef.current = setInterval(() => {
         setTimeLeft(prev => prev - 1);
         setTotalSessionTimeLeft(prev => prev - 1);
+        setElapsedTimeInItem(prev => prev + 1);
       }, 1000);
     } else if (timeLeft === 0 && sessionStarted) {
       // Move to next task
@@ -91,6 +93,7 @@ export default function RunSessionPage() {
         const nextTaskIndex = currentTaskIndex + 1;
         setCurrentTaskIndex(nextTaskIndex);
         setTimeLeft(parseTimeToSeconds(allTasks[nextTaskIndex].duration));
+        setElapsedTimeInItem(0);
       } else {
         // Session complete
         endSession(true);
@@ -119,12 +122,13 @@ export default function RunSessionPage() {
     if (!currentSession) return;
     clearInterval(Number(intervalRef.current));
 
-    setTotalSessionTimeLeft(prev => prev - timeLeft); // Subtract remaining time from total
+    setTotalSessionTimeLeft(prev => prev - (timeLeft - elapsedTimeInItem)); // Subtract remaining time from total
 
     if (currentTaskIndex < allTasks.length - 1) {
       const nextTaskIndex = currentTaskIndex + 1;
       setCurrentTaskIndex(nextTaskIndex);
       setTimeLeft(parseTimeToSeconds(allTasks[nextTaskIndex].duration));
+      setElapsedTimeInItem(0);
     } else {
       // Already at the last item, end session
       endSession(true);
