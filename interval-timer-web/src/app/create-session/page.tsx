@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Session, WorkoutItem, SubItem } from '../../types';
+import { colorPalette } from '../../colors';
 
 export default function CreateSessionPage() {
   const router = useRouter();
@@ -10,10 +11,11 @@ export default function CreateSessionPage() {
   const [showSaveForm, setShowSaveForm] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const [workoutItems, setWorkoutItems] = useState<WorkoutItem[]>([
-    { id: '1', title: 'Warm-up', duration: '10:00', color: '#ffcc00', repetitions: 1 },
-    { id: '2', title: 'Actions', duration: '30:00', color: '#66cc33', repetitions: 1 },
-    { id: '3', title: 'Cooldown', duration: '10:00', color: '#3399ff', repetitions: 1 },
+    { id: '1', title: 'Warm-up', duration: '10:00', color: '#ef4444', repetitions: 1 },
+    { id: '2', title: 'Actions', duration: '30:00', color: '#22c55e', repetitions: 1 },
+    { id: '3', title: 'Cooldown', duration: '10:00', color: '#3b82f6', repetitions: 1 },
   ]);
+  const [activeColorPicker, setActiveColorPicker] = useState<string | null>(null);
 
   useEffect(() => {
     if (successMessage) {
@@ -43,6 +45,7 @@ export default function CreateSessionPage() {
                   title: 'New Sub-item',
                   duration: '00:00',
                   disregardInLastRepetition: false,
+                  color: item.color, // Default to parent color
                 },
               ],
             }
@@ -57,7 +60,8 @@ export default function CreateSessionPage() {
         item.id === itemId
           ? {
               ...item,
-              subItems: item.subItems?.map((subItem).id === subItemId ? { ...subItem, [field]: value } : subItem
+              subItems: item.subItems?.map((subItem) =>
+                subItem.id === subItemId ? { ...subItem, [field]: value } : subItem
               ),
             }
           : item
@@ -85,7 +89,7 @@ export default function CreateSessionPage() {
         id: Date.now().toString(), // Simple unique ID
         title: 'New Item',
         duration: '00:00',
-        color: '#cccccc',
+        color: '#78716c',
         repetitions: 1,
       },
     ]);
@@ -230,17 +234,30 @@ export default function CreateSessionPage() {
                     placeholder="e.g., 05:00"
                   />
                 </div>
-                <div className="flex flex-col">
-                  <label htmlFor={`itemColor-${item.id}`} className="block text-sm font-bold mb-2">
+                <div className="flex flex-col relative">
+                  <label className="block text-sm font-bold mb-2">
                     Background Color
                   </label>
-                  <input
-                    type="color"
-                    id={`itemColor-${item.id}`}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline bg-white h-10"
-                    value={item.color}
-                    onChange={(e) => handleItemChange(item.id, 'color', e.target.value)}
+                  <div
+                    className="w-full h-10 rounded cursor-pointer border-2 border-white"
+                    style={{ backgroundColor: item.color }}
+                    onClick={() => setActiveColorPicker(activeColorPicker === item.id ? null : item.id)}
                   />
+                  {activeColorPicker === item.id && (
+                    <div className="absolute top-12 left-0 z-10 bg-gray-800 p-2 rounded shadow-lg grid grid-cols-8 gap-1 w-64 border border-gray-600">
+                      {colorPalette.map((c) => (
+                        <div
+                          key={c}
+                          className="w-6 h-6 rounded cursor-pointer border border-gray-500 hover:border-white"
+                          style={{ backgroundColor: c }}
+                          onClick={() => {
+                            handleItemChange(item.id, 'color', c);
+                            setActiveColorPicker(null);
+                          }}
+                        />
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -248,7 +265,7 @@ export default function CreateSessionPage() {
               <div className="mt-4 space-y-2">
                 {item.subItems?.map((subItem, index) => (
                   <div key={subItem.id}>
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center space-x-2 relative">
                       <input
                         type="text"
                         className="shadow appearance-none border rounded w-full py-1 px-2 text-black leading-tight focus:outline-none focus:shadow-outline bg-white"
@@ -263,12 +280,30 @@ export default function CreateSessionPage() {
                         onChange={(e) => handleSubItemChange(item.id, subItem.id, 'duration', e.target.value)}
                         placeholder="mm:ss"
                       />
-                      <input
-                        type="color"
-                        className="shadow appearance-none border rounded w-full py-1 px-2 leading-tight focus:outline-none focus:shadow-outline bg-white h-8"
-                        value={subItem.color || item.color}
-                        onChange={(e) => handleSubItemChange(item.id, subItem.id, 'color', e.target.value)}
-                      />
+                      
+                      <div className="relative">
+                        <div
+                          className="w-8 h-8 rounded cursor-pointer border-2 border-white"
+                          style={{ backgroundColor: subItem.color || item.color }}
+                          onClick={() => setActiveColorPicker(activeColorPicker === subItem.id ? null : subItem.id)}
+                        />
+                         {activeColorPicker === subItem.id && (
+                            <div className="absolute top-10 right-0 z-10 bg-gray-800 p-2 rounded shadow-lg grid grid-cols-8 gap-1 w-64 border border-gray-600">
+                              {colorPalette.map((c) => (
+                                <div
+                                  key={c}
+                                  className="w-6 h-6 rounded cursor-pointer border border-gray-500 hover:border-white"
+                                  style={{ backgroundColor: c }}
+                                  onClick={() => {
+                                    handleSubItemChange(item.id, subItem.id, 'color', c);
+                                    setActiveColorPicker(null);
+                                  }}
+                                />
+                              ))}
+                            </div>
+                          )}
+                      </div>
+
                       <button
                         onClick={() => deleteSubItem(item.id, subItem.id)}
                         className="bg-red-600 hover:bg-red-800 text-white font-bold py-1 px-2 rounded"
