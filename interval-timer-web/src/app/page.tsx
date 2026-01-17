@@ -2,20 +2,7 @@
 
 import Link from "next/link";
 import { useState, useEffect } from 'react';
-
-interface WorkoutItem {
-  id: string;
-  title: string;
-  duration: string; // mm:ss format
-  color: string;
-  repetitions: number;
-}
-
-interface Session {
-  id: string;
-  name: string;
-  items: WorkoutItem[];
-}
+import { Session, WorkoutItem, SubItem } from '../types';
 
 export default function Home() {
   const [sessions, setSessions] = useState<Session[]>([]);

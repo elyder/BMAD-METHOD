@@ -2,20 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-
-interface WorkoutItem {
-  id: string;
-  title: string;
-  duration: string; // mm:ss format
-  color: string;
-  repetitions: number;
-}
-
-interface Session {
-  id: string;
-  name: string;
-  items: WorkoutItem[];
-}
+import { Session, WorkoutItem, SubItem } from '../types';
 
 export default function CreateSessionPage() {
   const router = useRouter();
@@ -43,6 +30,54 @@ export default function CreateSessionPage() {
     );
   };
 
+  const addSubItem = (itemId: string) => {
+    setWorkoutItems((prevItems) =>
+      prevItems.map((item) =>
+        item.id === itemId
+          ? {
+              ...item,
+              subItems: [
+                ...(item.subItems || []),
+                {
+                  id: Date.now().toString(),
+                  title: 'New Sub-item',
+                  duration: '00:00',
+                },
+              ],
+            }
+          : item
+      )
+    );
+  };
+
+  const handleSubItemChange = (itemId: string, subItemId: string, field: keyof SubItem, value: string) => {
+    setWorkoutItems((prevItems) =>
+      prevItems.map((item) =>
+        item.id === itemId
+          ? {
+              ...item,
+              subItems: item.subItems?.map((subItem) =>
+                subItem.id === subItemId ? { ...subItem, [field]: value } : subItem
+              ),
+            }
+          : item
+      )
+    );
+  };
+
+  const deleteSubItem = (itemId: string, subItemId: string) => {
+    setWorkoutItems((prevItems) =>
+      prevItems.map((item) =>
+        item.id === itemId
+          ? {
+              ...item,
+              subItems: item.subItems?.filter((subItem) => subItem.id !== subItemId),
+            }
+          : item
+      )
+    );
+  };
+
   const addItem = () => {
     setWorkoutItems((prevItems) => [
       ...prevItems,
@@ -63,8 +98,20 @@ export default function CreateSessionPage() {
   const calculateTotalDuration = () => {
     let totalSeconds = 0;
     workoutItems.forEach((item) => {
-      const [minutes, seconds] = item.duration.split(':').map(Number);
-      totalSeconds += (minutes * 60 + seconds) * item.repetitions;
+      let itemTotalSeconds = 0;
+      if (item.duration) {
+        const [minutes, seconds] = item.duration.split(':').map(Number);
+        itemTotalSeconds += minutes * 60 + seconds;
+      }
+      if (item.subItems) {
+        item.subItems.forEach((subItem) => {
+          if (subItem.duration) {
+            const [minutes, seconds] = subItem.duration.split(':').map(Number);
+            itemTotalSeconds += minutes * 60 + seconds;
+          }
+        });
+      }
+      totalSeconds += itemTotalSeconds * item.repetitions;
     });
 
     const totalMinutes = Math.floor(totalSeconds / 60);
@@ -136,57 +183,93 @@ export default function CreateSessionPage() {
 
         <div className="space-y-4">
           {workoutItems.map((item) => (
-            <div key={item.id} className="bg-gray-700 p-6 rounded-lg shadow-md flex flex-col md:flex-row md:items-end md:space-x-4">
-              <div className="flex-grow grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="flex flex-col">
-                  <h3 className="text-lg font-bold mb-2">{item.title}</h3>
-                  <div className="text-gray-400">{item.duration}</div>
+            <div key={item.id} className="bg-gray-700 p-6 rounded-lg shadow-md">
+              <div className="flex flex-col md:flex-row md:items-end md:space-x-4">
+                <div className="flex-grow grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="flex flex-col">
+                    <h3 className="text-lg font-bold mb-2">{item.title}</h3>
+                    <div className="text-gray-400">{item.duration}</div>
+                  </div>
+                  <div className="flex flex-col">
+                    <label htmlFor={`itemDuration-${item.id}`} className="block text-sm font-bold mb-2">
+                      Duration (mm:ss)
+                    </label>
+                    <input
+                      type="text"
+                      id={`itemDuration-${item.id}`}
+                      className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline bg-gray-600"
+                      value={item.duration}
+                      onChange={(e) => handleItemChange(item.id, 'duration', e.target.value)}
+                      placeholder="e.g., 05:00"
+                    />
+                  </div>
+                  <div className="flex flex-col">
+                    <label htmlFor={`itemColor-${item.id}`} className="block text-sm font-bold mb-2">
+                      Background Color
+                    </label>
+                    <input
+                      type="color"
+                      id={`itemColor-${item.id}`}
+                      className="shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline bg-gray-600 h-10"
+                      value={item.color}
+                      onChange={(e) => handleItemChange(item.id, 'color', e.target.value)}
+                    />
+                  </div>
+                  <div className="flex flex-col">
+                    <label htmlFor={`itemRepetitions-${item.id}`} className="block text-sm font-bold mb-2">
+                      Repetitions
+                    </label>
+                    <input
+                      type="number"
+                      id={`itemRepetitions-${item.id}`}
+                      className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline bg-gray-600"
+                      value={item.repetitions}
+                      onChange={(e) => handleItemChange(item.id, 'repetitions', parseInt(e.target.value) || 1)}
+                      min="1"
+                    />
+                  </div>
                 </div>
-                <div className="flex flex-col">
-                  <label htmlFor={`itemDuration-${item.id}`} className="block text-sm font-bold mb-2">
-                    Duration (mm:ss)
-                  </label>
-                  <input
-                    type="text"
-                    id={`itemDuration-${item.id}`}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline bg-gray-600"
-                    value={item.duration}
-                    onChange={(e) => handleItemChange(item.id, 'duration', e.target.value)}
-                    placeholder="e.g., 05:00"
-                  />
-                </div>
-                <div className="flex flex-col">
-                  <label htmlFor={`itemColor-${item.id}`} className="block text-sm font-bold mb-2">
-                    Background Color
-                  </label>
-                  <input
-                    type="color"
-                    id={`itemColor-${item.id}`}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline bg-gray-600 h-10"
-                    value={item.color}
-                    onChange={(e) => handleItemChange(item.id, 'color', e.target.value)}
-                  />
-                </div>
-                <div className="flex flex-col">
-                  <label htmlFor={`itemRepetitions-${item.id}`} className="block text-sm font-bold mb-2">
-                    Repetitions
-                  </label>
-                  <input
-                    type="number"
-                    id={`itemRepetitions-${item.id}`}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline bg-gray-600"
-                    value={item.repetitions}
-                    onChange={(e) => handleItemChange(item.id, 'repetitions', parseInt(e.target.value) || 1)}
-                    min="1"
-                  />
-                </div>
+                <button
+                  onClick={() => deleteItem(item.id)}
+                  className="mt-4 md:mt-0 bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+                >
+                  Delete
+                </button>
               </div>
-              <button
-                onClick={() => deleteItem(item.id)}
-                className="mt-4 md:mt-0 bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
-              >
-                Delete
-              </button>
+
+              {/* Sub-items */}
+              <div className="mt-4 space-y-2">
+                {item.subItems?.map((subItem) => (
+                  <div key={subItem.id} className="flex items-center space-x-2">
+                    <input
+                      type="text"
+                      className="shadow appearance-none border rounded w-full py-1 px-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline bg-gray-600"
+                      value={subItem.title}
+                      onChange={(e) => handleSubItemChange(item.id, subItem.id, 'title', e.target.value)}
+                      placeholder="Sub-item title"
+                    />
+                    <input
+                      type="text"
+                      className="shadow appearance-none border rounded w-full py-1 px-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline bg-gray-600"
+                      value={subItem.duration}
+                      onChange={(e) => handleSubItemChange(item.id, subItem.id, 'duration', e.target.value)}
+                      placeholder="mm:ss"
+                    />
+                    <button
+                      onClick={() => deleteSubItem(item.id, subItem.id)}
+                      className="bg-red-600 hover:bg-red-800 text-white font-bold py-1 px-2 rounded"
+                    >
+                      X
+                    </button>
+                  </div>
+                ))}
+                <button
+                  onClick={() => addSubItem(item.id)}
+                  className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded mt-2"
+                >
+                  Add Sub-item
+                </button>
+              </div>
             </div>
           ))}
         </div>
