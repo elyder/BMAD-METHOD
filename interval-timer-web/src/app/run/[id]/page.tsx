@@ -201,18 +201,18 @@ export default function RunSessionPage({ params }: { params: Promise<{ id: strin
   return (
     <div ref={containerRef} className="w-full h-screen flex flex-col items-center justify-center bg-gray-900 text-white p-4" style={{backgroundColor: status === 'running' ? currentStep.color : '#111827'}}>
         
-        <div className="w-full max-w-2xl mb-4">
-            <div className="flex justify-between text-sm">
+        <div className="w-full max-w-xl mb-4">
+            <div className="flex justify-between text-lg">
                 <span>{session.name}</span>
                 <span>{formatTime(timeElapsed)} / {formatTime(totalTime)}</span>
             </div>
-            <div className="w-full bg-gray-700 rounded-full h-2.5">
-                <div className="bg-blue-500 h-2.5 rounded-full" style={{ width: `${progressPercent}%` }}></div>
+            <div className="w-full bg-gray-700 rounded-full h-5">
+                <div className="bg-blue-500 h-5 rounded-full" style={{ width: `${progressPercent}%` }}></div>
             </div>
         </div>
 
         {/* New Container for Text Content */}
-        <div className="flex flex-col items-center justify-center bg-gray-800 text-white p-8 rounded-lg shadow-lg max-w-2xl w-full flex-grow">
+        <div className="flex flex-col items-center justify-center bg-gray-800 text-white p-8 rounded-lg shadow-lg max-w-xl w-full" style={{height: '60vh'}}>
             {/* Main Timer Display */}
             <div className="text-center">
                 {currentStep.description && <p className="text-3xl text-white mt-2">{currentStep.description}</p>}
