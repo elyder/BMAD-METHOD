@@ -1,34 +1,37 @@
-export const colorPalette = [
-  '#ef4444', // red-500
-  '#f97316', // orange-500
-  '#f59e0b', // amber-500
-  '#eab308', // yellow-500
-  '#84cc16', // lime-500
-  '#22c55e', // green-500
-  '#10b981', // emerald-500
-  '#14b8a6', // teal-500
-  '#06b6d4', // cyan-500
-  '#0ea5e9', // sky-500
-  '#3b82f6', // blue-500
-  '#6366f1', // indigo-500
-  '#8b5cf6', // violet-500
-  '#a855f7', // purple-500
-  '#d946ef', // fuchsia-500
-  '#ec4899', // pink-500
-  '#f43f5e', // rose-500
-  '#78716c', // stone-500
-  '#64748b', // slate-500
-  '#6b7280', // gray-500
-  '#71717a', // zinc-500
-  '#737373', // neutral-500
-  '#b91c1c', // red-700
-  '#c2410c', // orange-700
-  '#b45309', // amber-700
-  '#a16207', // yellow-700
-  '#4d7c0f', // lime-700
-  '#15803d', // green-700
-  '#047857', // emerald-700
-  '#0f766e', // teal-700
-  '#0e7490', // cyan-700
-  '#0369a1', // sky-700
+import { WorkoutItemType } from "./types";
+
+export const WARMUP_COLORS = [
+    '#FBBF24', // amber-400
+    '#F59E0B', // amber-500
+    '#D97706', // amber-600
+    '#FB923C', // orange-400
+    '#F97316', // orange-500
+    '#EA580C', // orange-600
 ];
+
+export const ACTION_COLORS = [
+    '#74A257', 
+    '#36903D', 
+    '#007C28', 
+    '#00681A', 
+    '#00550E', 
+    '#004200',
+    '#C45151', 
+    '#B52F2F', 
+    '#A00000', 
+    '#8B0000', 
+    '#760000', 
+    '#610000',
+];
+
+export const COOLDOWN_COLORS = [
+    '#60A5FA', // blue-400
+    '#3B82F6', // blue-500
+    '#2563EB', // blue-600
+];
+
+export const COLOR_PALETTES: Record<WorkoutItemType, string[]> = {
+    'Warm-up': WARMUP_COLORS,
+    'Action': ACTION_COLORS,
+    'Cool-down': COOLDOWN_COLORS,
+};

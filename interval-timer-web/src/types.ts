@@ -1,27 +1,56 @@
-export interface Task {
+// interval-timer-web/src/types.ts
+
+/**
+ * Represents a single sub-item within a workout item, like a specific exercise or rest period.
+ */
+export interface SubItem {
   id: string;
-  title: string;
-  duration: string; // mm:ss format
-  color?: string;
-  repetitions: number;
-  repetition?: number; // The current repetition number
-  totalRepetitions?: number; // The total number of repetitions for the parent item
+  description: string;
+  speed: number;
+  incline: number;
+  timer: number; // Duration in seconds
+  color: string; // Background color for the timer display
+  omitForLastSet: boolean; // If true, this sub-item is skipped during the last set of the parent item
 }
 
-export type SubItem = Omit<Task, 'repetitions' | 'repetition' | 'color' | 'totalRepetitions'> & {
-  disregardInLastRepetition?: boolean;
-  color?: string;
-};
+export type WorkoutItemType = 'Warm-up' | 'Action' | 'Cool-down';
 
-export interface WorkoutItem extends Task {
-  subItems?: SubItem[];
+/**
+ * Represents a major component of a workout session, like a warm-up, a series of exercises, or a cool-down.
+ */
+export interface WorkoutItem {
+  id: string;
+  type: WorkoutItemType;
+  description: string;
+  speed: number;
+  incline: number;
+  timer: number; // Duration in seconds. Note: this might be redundant if sub-items are always present.
+  sets: number; // Number of times to repeat the sub-items
+  color: string; // Background color for the timer display
+  subItems: SubItem[];
 }
 
-export interface Session {
-  id: string;
+/**
+ * Represents a complete workout session, composed of multiple workout items.
+ */
+export interface WorkoutSession {
+  id: string; // Unique identifier
   name: string;
-  details?: string;
+  description?: string; // Optional user-provided description
+  showPace: boolean; // Whether to show pace during the run
   items: WorkoutItem[];
-  createdAt?: number;
-  lastRunAt?: number;
+  createdAt: string; // ISO 8601 date string
+  lastUsedAt?: string; // ISO 8601 date string
+  totalTime: number; // Total duration of the session in seconds
+}
+
+/**
+ * Represents a log entry for a completed workout session.
+ */
+export interface LogEntry {
+  id: string;
+  date: string; // ISO 8601 date string
+  sessionId: string;
+  sessionName: string;
+  reflections?: string; // Optional user notes
 }
