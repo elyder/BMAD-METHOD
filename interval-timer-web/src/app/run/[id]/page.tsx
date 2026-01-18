@@ -11,7 +11,7 @@ import { calculatePace } from '@/lib/utils';
 
 
 
-type TimerStatus = 'idle' | 'running' | 'paused' | 'finished';
+type TimerStatus = 'idle' | 'countdown' | 'running' | 'paused' | 'finished';
 
 
 
@@ -33,6 +33,7 @@ export default function RunSessionPage({ params }: { params: Promise<{ id: strin
   const router = useRouter();
   const [session, setSession] = useState<WorkoutSession | null>(null);
   const [status, setStatus] = useState<TimerStatus>('idle');
+  const [countdownDisplay, setCountdownDisplay] = useState<number | null>(null);
   const [workoutPlan, setWorkoutPlan] = useState<WorkoutStep[]>([]);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [timeRemaining, setTimeRemaining] = useState(0);
@@ -43,12 +44,16 @@ export default function RunSessionPage({ params }: { params: Promise<{ id: strin
   const endAudioRef = useRef<HTMLAudioElement | null>(null);
   const preBeepAudioRef = useRef<HTMLAudioElement | null>(null);
   const startBeepAudioRef = useRef<HTMLAudioElement | null>(null);
+  const beep1AudioRef = useRef<HTMLAudioElement | null>(null);
+  const beep2AudioRef = useRef<HTMLAudioElement | null>(null);
 
   // Effect to initialize audio objects
   useEffect(() => {
     endAudioRef.current = new Audio('/audio/end.wav');
     preBeepAudioRef.current = new Audio('/audio/pre_beep.wav');
     startBeepAudioRef.current = new Audio('/audio/start_beep.wav');
+    beep1AudioRef.current = new Audio('/1.wav');
+    beep2AudioRef.current = new Audio('/2.wav');
   }, []);
 
   // Load Session and build the workout plan
@@ -126,7 +131,7 @@ export default function RunSessionPage({ params }: { params: Promise<{ id: strin
       const nextStepIndex = currentStepIndex + 1;
       setCurrentStepIndex(nextStepIndex);
       setTimeRemaining(workoutPlan[nextStepIndex].duration);
-      if (startBeepAudioRef.current) startBeepAudioRef.current.play();
+      if (beep2AudioRef.current) beep2AudioRef.current.play();
     }
   }, [currentStepIndex, workoutPlan]);
   
@@ -135,10 +140,10 @@ export default function RunSessionPage({ params }: { params: Promise<{ id: strin
     if (status !== 'running') return;
 
     const interval = setInterval(() => {
-      // Play pre-beeps on 3, 2, 1 seconds remaining
-      if ([3, 2, 1].includes(timeRemaining)) {
-        if (preBeepAudioRef.current) {
-            preBeepAudioRef.current.play();
+      // Play pre-beeps on 4, 3, 2 seconds remaining, to sound *before* the number changes
+      if ([4, 3, 2].includes(timeRemaining)) {
+        if (beep1AudioRef.current) {
+            beep1AudioRef.current.play();
         }
       }
 
@@ -154,6 +159,46 @@ export default function RunSessionPage({ params }: { params: Promise<{ id: strin
     return () => clearInterval(interval);
   }, [status, timeRemaining, advance]);
   
+    // Countdown effect
+    useEffect(() => {
+        if (status !== 'countdown') return;
+
+        let countdownCancelled = false;
+        const timeouts: NodeJS.Timeout[] = [];
+
+        const runCountdown = async () => {
+            // 3
+            setCountdownDisplay(3);
+            if (beep1AudioRef.current) await beep1AudioRef.current.play().catch(e => {});
+            if (countdownCancelled) return;
+            await new Promise(res => timeouts.push(setTimeout(res, 1000)));
+
+            // 2
+            setCountdownDisplay(2);
+            if (beep1AudioRef.current) await beep1AudioRef.current.play().catch(e => {});
+            if (countdownCancelled) return;
+            await new Promise(res => timeouts.push(setTimeout(res, 1000)));
+
+            // 1
+            setCountdownDisplay(1);
+            if (beep1AudioRef.current) await beep1AudioRef.current.play().catch(e => {});
+            if (countdownCancelled) return;
+            await new Promise(res => timeouts.push(setTimeout(res, 1000)));
+
+            // 0
+            setCountdownDisplay(null);
+            if (beep2AudioRef.current) await beep2AudioRef.current.play().catch(e => {});
+            setStatus('running');
+        };
+
+        runCountdown();
+
+        return () => {
+          countdownCancelled = true;
+          timeouts.forEach(clearTimeout);
+        };
+    }, [status]); // Only runs when status changes to 'countdown'
+
   const startTimer = () => {
     if (startBeepAudioRef.current?.paused) {
         startBeepAudioRef.current.play();
@@ -165,7 +210,7 @@ export default function RunSessionPage({ params }: { params: Promise<{ id: strin
             console.error(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
         });
     }
-    setStatus('running');
+    setStatus('countdown');
   };
 
   const pauseTimer = () => setStatus('paused');
@@ -206,7 +251,7 @@ export default function RunSessionPage({ params }: { params: Promise<{ id: strin
                 <span>{session.name}</span>
                 <span>{formatTime(timeElapsed)} / {formatTime(totalTime)}</span>
             </div>
-            <div className="w-full bg-gray-700 rounded-full h-5">
+            <div className="w-full bg-gray-700 rounded-full h-5 overflow-hidden">
                 <div className="bg-blue-500 h-5 rounded-full" style={{ width: `${progressPercent}%` }}></div>
             </div>
         </div>
@@ -251,6 +296,12 @@ export default function RunSessionPage({ params }: { params: Promise<{ id: strin
             <button onClick={endSession} className="px-8 py-3 bg-red-600 rounded-lg text-xl">End</button>
         </div>
         
+        {status === 'countdown' && countdownDisplay !== null && (
+            <div className="absolute inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+                <h2 className="text-9xl font-bold">{countdownDisplay}</h2>
+            </div>
+        )}
+
         {status === 'finished' && (
             <div className="absolute inset-0 bg-black bg-opacity-80 flex flex-col justify-center items-center">
                 <h2 className="text-5xl font-bold">Workout Complete!</h2>
