@@ -119,8 +119,8 @@ export default function WorkoutItemForm({
                         />
                     </FormField>
                     {/* Placeholders for grid alignment */}
-                    <FormField label="Omit Last" />
-                    <FormField label="Actions" />
+                    <FormField label="Omit Last"><span></span></FormField>
+                    <FormField label="Actions"><span></span></FormField>
                 </div>
             </div>
 

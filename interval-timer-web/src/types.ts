@@ -13,7 +13,7 @@ export interface SubItem {
   omitForLastSet: boolean; // If true, this sub-item is skipped during the last set of the parent item
 }
 
-export type WorkoutItemType = 'Warm-up' | 'Action' | 'Cool-down';
+export type WorkoutItemType = 'Warm-up' | 'Work-out' | 'Cool-down';
 
 /**
  * Represents a major component of a workout session, like a warm-up, a series of exercises, or a cool-down.

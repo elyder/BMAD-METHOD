@@ -39,7 +39,7 @@ export default function SessionForm({ session, setSession }: SessionFormProps) {
   const handleAddItem = () => {
     const newItem: WorkoutItem = {
       id: `item-${session?.id}-${new Date().getTime()}`,
-      type: 'Action', // Default type
+      type: 'Work-out', // Default type
       description: 'New Item',
       speed: 0,
       incline: 0,
