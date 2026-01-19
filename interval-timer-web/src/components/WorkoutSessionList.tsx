@@ -115,7 +115,18 @@ export default function WorkoutSessionList() {
                   </Link>
               </div>
               <div className="pt-4 border-t border-gray-700 flex justify-between items-center">
-                 <p className="text-xl text-gray-300 font-semibold">Total: {formatTotalTime(session.totalTime)}</p>
+                <div className="flex flex-col gap-4">
+                    <p className="text-xl text-gray-300 font-semibold">Total: {formatTotalTime(session.totalTime)}</p>
+                    <label className="flex items-center gap-3 text-lg text-gray-300 cursor-pointer">
+                        <input
+                            type="checkbox"
+                            checked={!!session.showPace}
+                            onChange={() => handleTogglePace(session.id)}
+                            className="h-7 w-7 rounded-md"
+                        />
+                        Show pace during workout
+                    </label>
+                </div>
                  <div className="flex items-center gap-4">
                     <button onClick={() => router.push(`/session/edit/${session.id}`)} className="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 font-bold text-xl">
                         Edit
@@ -123,17 +134,6 @@ export default function WorkoutSessionList() {
                     <button onClick={() => handleDuplicate(session.id)} className="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 font-bold text-xl">Duplicate</button>
                     <button onClick={() => handleDelete(session.id)} className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 font-bold text-xl">Delete</button>
                  </div>
-              </div>
-              <div className="pt-4 border-t border-gray-700">
-                <label className="flex items-center gap-3 text-lg text-gray-300 cursor-pointer">
-                    <input 
-                        type="checkbox"
-                        checked={!!session.showPace}
-                        onChange={() => handleTogglePace(session.id)}
-                        className="h-7 w-7 rounded-md"
-                    />
-                    Show pace during workout
-                </label>
               </div>
             </li>
           ))}
