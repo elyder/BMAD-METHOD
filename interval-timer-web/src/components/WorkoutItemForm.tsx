@@ -66,8 +66,38 @@ export default function WorkoutItemForm({
 
   const gridLayout = "grid grid-cols-[1fr,1fr,1.5fr,1fr,1fr,1fr] gap-3 items-start";
 
+  const getBorderColorClass = (type: WorkoutItemType) => {
+    switch (type) {
+      case 'Warm-up':
+        return 'border-yellow-500';
+      case 'Work-out':
+        return 'border-green-500';
+      case 'Cool-down':
+        return 'border-blue-500';
+      default:
+        return 'border-gray-700'; // Fallback
+    }
+  };
+
+  const borderColorClass = getBorderColorClass(item.type);
+
+  const getSegmentSelectedColorClass = (type: WorkoutItemType) => {
+    switch (type) {
+      case 'Warm-up':
+        return 'bg-yellow-500';
+      case 'Work-out':
+        return 'bg-green-500';
+      case 'Cool-down':
+        return 'bg-blue-500';
+      default:
+        return 'bg-gray-700'; // Fallback
+    }
+  };
+
+  const segmentSelectedColorClass = getSegmentSelectedColorClass(item.type);
+
   return (
-    <div className="p-4 bg-gray-800 rounded-lg border-2 border-gray-700 space-y-4">
+    <div className={`p-4 bg-gray-800 rounded-lg border-4 ${borderColorClass} space-y-4`}>
         {/* Row 1: Main Item Actions */}
         <div className="flex justify-between items-center gap-4">
             <div className="flex items-center gap-6">
@@ -75,6 +105,7 @@ export default function WorkoutItemForm({
                     options={itemTypes}
                     value={item.type}
                     onChange={handleTypeChange}
+                    selectedColorClass={segmentSelectedColorClass}
                 />
                 <div className="flex items-center gap-2">
                     <label className="text-lg font-medium">Sets:</label>
@@ -144,7 +175,7 @@ export default function WorkoutItemForm({
         <div>
             <button
                 onClick={handleAddSubItem}
-                className="w-full py-3 px-4 text-lg border-2 border-dashed rounded-lg hover:bg-gray-700"
+                className="w-full py-3 px-4 text-lg border border-dashed border-gray-500 rounded-lg hover:bg-gray-700"
             >
                 + Add Sub-Item
             </button>

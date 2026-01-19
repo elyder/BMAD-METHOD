@@ -6,6 +6,7 @@ interface SegmentedControlProps<T extends string> {
   options: readonly T[];
   value: T;
   onChange: (value: T) => void;
+  selectedColorClass?: string; // New prop
   className?: string;
 }
 
@@ -13,6 +14,7 @@ export default function SegmentedControl<T extends string>({
   options,
   value,
   onChange,
+  selectedColorClass = 'bg-blue-500', // Default to blue if not provided
   className = '',
 }: SegmentedControlProps<T>) {
   return (
@@ -23,7 +25,7 @@ export default function SegmentedControl<T extends string>({
           type="button"
           onClick={() => onChange(option)}
           className={`flex-1 px-3 py-2 text-center rounded-md text-base font-semibold transition-colors
-            ${value === option ? 'bg-blue-500 text-white' : 'bg-transparent text-gray-300 hover:bg-gray-600'
+            ${value === option ? `${selectedColorClass} text-white` : 'bg-transparent text-gray-300 hover:bg-gray-600'
             }`}
         >
           {option}
