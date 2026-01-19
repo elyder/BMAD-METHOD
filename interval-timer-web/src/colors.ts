@@ -32,6 +32,6 @@ export const COOLDOWN_COLORS = [
 
 export const COLOR_PALETTES: Record<WorkoutItemType, string[]> = {
     'Warm-up': WARMUP_COLORS,
-    'Action': ACTION_COLORS,
+    'Work-out': ACTION_COLORS,
     'Cool-down': COOLDOWN_COLORS,
 };

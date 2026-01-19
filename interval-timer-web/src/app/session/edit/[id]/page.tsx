@@ -38,7 +38,7 @@ export default function SessionEditPage({ params }: { params: Promise<{ id: stri
           },
           {
             id: `item-${newSessionId}-2`,
-            type: 'Action',
+            type: 'Work-out',
             description: '',
             speed: 0,
             incline: 0,
@@ -89,8 +89,8 @@ export default function SessionEditPage({ params }: { params: Promise<{ id: stri
   const isNew = id === 'new';
 
   return (
-    <main className="flex min-h-screen flex-col items-center p-8 sm:p-12 md:p-24">
-      <div className="w-full max-w-4xl">
+    <main className="flex min-h-screen flex-col items-center p-6">
+      <div className="w-full">
         <header className="mb-8">
             <h1 className="text-4xl font-bold">
             {isNew ? 'Create New Workout Session' : `Edit: ${session.name}`}
@@ -102,13 +102,13 @@ export default function SessionEditPage({ params }: { params: Promise<{ id: stri
         <div className="mt-8 flex justify-end gap-4">
           <button
             onClick={() => router.push('/')}
-            className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
+            className="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 text-xl"
           >
             Cancel
           </button>
           <button
             onClick={handleSave}
-            className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+            className="px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 text-xl"
           >
             Save Session
           </button>

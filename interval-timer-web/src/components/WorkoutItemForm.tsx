@@ -5,8 +5,12 @@ import React from 'react';
 import SubItemForm from './SubItemForm';
 import ColorPalettePicker from './ColorPalettePicker';
 import { COLOR_PALETTES } from '../colors';
+import SegmentedControl from './ui/SegmentedControl';
+import NumberStepper from './ui/NumberStepper';
+import TimeInput from './ui/TimeInput';
+import FormField from './ui/FormField';
 
-const itemTypes: WorkoutItemType[] = ['Warm-up', 'Action', 'Cool-down'];
+const itemTypes: readonly WorkoutItemType[] = ['Warm-up', 'Work-out', 'Cool-down'];
 
 interface WorkoutItemFormProps {
   item: WorkoutItem;
@@ -24,51 +28,22 @@ export default function WorkoutItemForm({
   onDuplicate,
 }: WorkoutItemFormProps) {
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value, type } = e.target;
-    let updatedItem = { ...item };
-
-    let updatedValue;
-    if (type === 'number') {
-      updatedValue = parseFloat(value) || 0;
-    } else {
-      updatedValue = value;
-    }
-    
-    updatedItem = { ...updatedItem, [name]: updatedValue };
-
-    if (name === 'type') {
-        const newType = updatedValue as WorkoutItemType;
-        const newPalette = COLOR_PALETTES[newType] || [];
-        updatedItem.color = newPalette[0] || '#FFFFFF';
-    }
-
-    onUpdate(updatedItem);
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    onUpdate({ ...item, [name]: value });
   };
   
-  const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const [minutes, seconds] = e.target.value.split(':').map(Number);
-    const totalSeconds = (minutes * 60) + (seconds || 0);
-    onUpdate({ ...item, timer: totalSeconds });
-  };
-
-  const handleDurationChange = (amount: number) => {
-    const newTime = Math.max(0, item.timer + amount);
-    onUpdate({ ...item, timer: newTime });
-  };
-
-  const formatTime = (totalSeconds: number) => {
-    const minutes = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
-    const seconds = (totalSeconds % 60).toString().padStart(2, '0');
-    return `${minutes}:${seconds}`;
+  const handleTypeChange = (newType: WorkoutItemType) => {
+    const newPalette = COLOR_PALETTES[newType] || [];
+    onUpdate({ ...item, type: newType, color: newPalette[0] || '#FFFFFF' });
   };
 
   const handleAddSubItem = () => {
     const newSubItem: SubItem = {
       id: `sub-${item.id}-${new Date().getTime()}`,
       description: 'New Sub-Item',
-      speed: 0,
-      incline: 0,
+      speed: item.speed,
+      incline: item.incline,
       timer: 30,
       color: COLOR_PALETTES[item.type]?.[1] || COLOR_PALETTES[item.type]?.[0] || '#888888',
       omitForLastSet: false,
@@ -89,88 +64,86 @@ export default function WorkoutItemForm({
     onUpdate({ ...item, subItems });
   };
 
+  const gridLayout = "grid grid-cols-[1fr,1fr,1.5fr,1fr,1fr,1fr] gap-3 items-start";
+
   return (
-    <div className="p-4 bg-gray-800 rounded-lg border border-gray-700 space-y-3">
+    <div className="p-4 bg-gray-800 rounded-lg border-2 border-gray-700 space-y-4">
         {/* Row 1: Main Item Actions */}
-        <div className="flex justify-between items-center">
-            <div className="flex items-center gap-4">
-                <select name="type" value={item.type} onChange={handleChange} className="p-2 bg-white text-gray-900 rounded">
-                    {itemTypes.map(type => <option key={type} value={type}>{type}</option>)}
-                </select>
-                <div>
-                    <label className="text-sm mr-2">Sets:</label>
-                    <input
-                        type="number"
-                        name="sets"
+        <div className="flex justify-between items-center gap-4">
+            <div className="flex items-center gap-6">
+                <SegmentedControl
+                    options={itemTypes}
+                    value={item.type}
+                    onChange={handleTypeChange}
+                />
+                <div className="flex items-center gap-2">
+                    <label className="text-lg font-medium">Sets:</label>
+                    <NumberStepper
                         value={item.sets}
-                        onChange={handleChange}
-                        className="w-16 p-2 bg-white text-gray-900 rounded"
-                        min="1"
+                        onChange={(sets) => onUpdate({ ...item, sets })}
+                        min={1}
                     />
                 </div>
             </div>
             <div className="flex items-center gap-2">
-                <button onClick={() => onMove('up')} className="p-2 hover:bg-gray-700 rounded" title="Move Up">⬆️</button>
-                <button onClick={() => onMove('down')} className="p-2 hover:bg-gray-700 rounded" title="Move Down">⬇️</button>
-                <button onClick={onDuplicate} className="p-2 hover:bg-gray-700 rounded" title="Duplicate">📋</button>
-                <button onClick={onDelete} className="p-2 text-red-500 hover:bg-gray-700 rounded" title="Delete">❌</button>
+                <button onClick={() => onMove('up')} className="p-3 hover:bg-gray-700 rounded-lg text-2xl" title="Move Up">⬆️</button>
+                <button onClick={() => onMove('down')} className="p-3 hover:bg-gray-700 rounded-lg text-2xl" title="Move Down">⬇️</button>
+                <button onClick={onDuplicate} className="p-3 hover:bg-gray-700 rounded-lg text-2xl" title="Duplicate">📋</button>
+                <button onClick={onDelete} className="p-3 text-red-500 hover:bg-gray-700 rounded-lg text-2xl" title="Delete">❌</button>
             </div>
         </div>
 
         {/* Unified Table for Main and Sub-Items */}
-        <div className="space-y-2">
-            {/* Header Row */}
-            <div className="grid grid-cols-[1fr,1fr,64px,64px,90px,80px,80px,50px] gap-2 px-2 text-xs text-gray-400 items-center">
-                <span className="col-span-2">Description</span>
-                <span className="text-center">Speed</span>
-                <span className="text-center">Incline</span>
-                <span className="text-center">Duration</span>
-                <span className="text-center">Colour</span>
-                <span className="text-center">Omit Last</span>
-                <span className="text-right"></span>
+        <div className="space-y-4">
+            {/* Main Item Data */}
+            <div className="space-y-3 p-3 border border-gray-600 rounded-lg bg-gray-900">
+                <FormField label="Description">
+                    <textarea name="description" value={item.description} onChange={handleChange} placeholder="Item description" rows={2} className="p-2 bg-white text-gray-900 rounded text-lg w-full" />
+                </FormField>
+                
+                <div className={`${gridLayout}`}>
+                    <FormField label="Speed">
+                        <NumberStepper value={item.speed} onChange={(speed) => onUpdate({ ...item, speed })} step={0.1} min={0} />
+                    </FormField>
+                    <FormField label="Incline">
+                        <NumberStepper value={item.incline} onChange={(incline) => onUpdate({ ...item, incline })} min={0} />
+                    </FormField>
+                    <FormField label="Duration">
+                        <TimeInput value={item.timer} onChange={(timer) => onUpdate({ ...item, timer })} />
+                    </FormField>
+                    <FormField label="Colour">
+                        <ColorPalettePicker 
+                            itemType={item.type}
+                            selectedValue={item.color}
+                            onSelect={(color) => onUpdate({ ...item, color })}
+                        />
+                    </FormField>
+                    {/* Placeholders for grid alignment */}
+                    <FormField label="Omit Last" />
+                    <FormField label="Actions" />
+                </div>
             </div>
 
-            {/* Row 2: Main Item Data Row */}
-            <div className="grid grid-cols-[1fr,1fr,64px,64px,90px,80px,80px,50px] gap-2 items-center">
-                <textarea name="description" value={item.description} onChange={handleChange} placeholder="Item description" rows={1} className="p-1 bg-white text-gray-900 rounded text-sm w-full col-span-2" />
-                <input type="number" name="speed" value={item.speed} onChange={handleChange} placeholder="Speed" className="p-1 bg-white text-gray-900 rounded text-sm w-16 text-center" step="0.1" />
-                <input type="number" name="incline" value={item.incline} onChange={handleChange} placeholder="Incline" className="p-1 bg-white text-gray-900 rounded text-sm w-16 text-center" />
-                <div className="flex items-center">
-                    <input type="text" value={formatTime(item.timer)} onChange={handleTimeChange} placeholder="mm:ss" className="p-1 bg-white text-gray-900 rounded-l text-sm w-16 text-center" />
-                    <div className="flex flex-col">
-                        <button onClick={() => handleDurationChange(30)} className="px-1 bg-gray-600 hover:bg-gray-500 rounded-tr text-xs">▲</button>
-                        <button onClick={() => handleDurationChange(-30)} className="px-1 bg-gray-600 hover:bg-gray-500 rounded-br text-xs">▼</button>
+            {/* Sub-item Data Rows */}
+            <div className="space-y-4">
+                {item.subItems.map(subItem => (
+                    <div key={subItem.id} className="w-full">
+                        <SubItemForm 
+                            item={subItem}
+                            itemType={item.type}
+                            onUpdate={handleUpdateSubItem}
+                            onDelete={() => handleDeleteSubItem(subItem.id)}
+                        />
                     </div>
-                </div>
-                <div className="flex justify-center">
-                    <ColorPalettePicker 
-                        itemType={item.type}
-                        selectedValue={item.color}
-                        onSelect={(color) => onUpdate({ ...item, color })}
-                    />
-                </div>
-                <span></span>
-                <span></span>
+                ))}
             </div>
-
-            {/* Row 3: Sub-item Data Rows */}
-            {item.subItems.map(subItem => (
-                 <div key={subItem.id} className="grid grid-cols-[1fr,1fr,64px,64px,90px,80px,80px,50px] gap-2 items-center">
-                    <SubItemForm 
-                        item={subItem}
-                        itemType={item.type}
-                        onUpdate={handleUpdateSubItem}
-                        onDelete={() => handleDeleteSubItem(subItem.id)}
-                    />
-                </div>
-            ))}
         </div>
 
-        {/* Row 4: Add Sub-item */}
+        {/* Add Sub-item Button */}
         <div>
             <button
                 onClick={handleAddSubItem}
-                className="w-full py-2 px-4 text-sm border-2 border-dashed rounded-lg hover:bg-gray-700"
+                className="w-full py-3 px-4 text-lg border-2 border-dashed rounded-lg hover:bg-gray-700"
             >
                 + Add Sub-Item
             </button>

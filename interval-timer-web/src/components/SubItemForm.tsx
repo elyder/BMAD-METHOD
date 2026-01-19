@@ -3,6 +3,9 @@
 import { SubItem, WorkoutItemType } from '@/types';
 import React from 'react';
 import ColorPalettePicker from './ColorPalettePicker';
+import NumberStepper from './ui/NumberStepper';
+import TimeInput from './ui/TimeInput';
+import FormField from './ui/FormField';
 
 interface SubItemFormProps {
   item: SubItem;
@@ -19,84 +22,68 @@ export default function SubItemForm({ item, itemType, onUpdate, onDelete }: SubI
     onUpdate({ ...item, [name]: updatedValue });
   };
 
-  const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const [minutes, seconds] = e.target.value.split(':').map(Number);
-    const totalSeconds = (minutes * 60) + (seconds || 0);
-    onUpdate({ ...item, timer: totalSeconds });
-  };
-
-  const handleDurationChange = (amount: number) => {
-    const newTime = Math.max(0, item.timer + amount);
-    onUpdate({ ...item, timer: newTime });
-  };
-
-  const formatTime = (totalSeconds: number) => {
-    const minutes = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
-    const seconds = (totalSeconds % 60).toString().padStart(2, '0');
-    return `${minutes}:${seconds}`;
-  };
-
   return (
-    <>
-      <textarea
-          name="description"
-          value={item.description}
-          onChange={handleChange}
-          placeholder="Sub-item description"
-          rows={1}
-          className="p-1 bg-white text-gray-900 rounded text-sm w-full col-span-2"
-      />
-      <input
-          type="number"
-          name="speed"
-          value={item.speed}
-          onChange={handleChange}
-          placeholder="Speed"
-          className="p-1 bg-white text-gray-900 rounded text-sm w-16 text-center"
-          step="0.1"
-      />
-      <input
-          type="number"
-          name="incline"
-          value={item.incline}
-          onChange={handleChange}
-          placeholder="Incline"
-          className="p-1 bg-white text-gray-900 rounded text-sm w-16 text-center"
-      />
-      <div className="flex items-center">
-        <input
-            type="text"
-            value={formatTime(item.timer)}
-            onChange={handleTimeChange}
-            placeholder="mm:ss"
-            className="p-1 bg-white text-gray-900 rounded-l text-sm w-16 text-center"
-        />
-        <div className="flex flex-col">
-            <button onClick={() => handleDurationChange(30)} className="px-1 bg-gray-600 hover:bg-gray-500 rounded-tr text-xs">▲</button>
-            <button onClick={() => handleDurationChange(-30)} className="px-1 bg-gray-600 hover:bg-gray-500 rounded-br text-xs">▼</button>
+    <div className="w-full space-y-3 p-3 border border-gray-600 rounded-lg bg-gray-800">
+        {/* Row 1: Description */}
+        <FormField label="Description">
+            <textarea
+                name="description"
+                value={item.description}
+                onChange={handleChange}
+                placeholder="Sub-item description"
+                rows={2}
+                className="p-2 bg-white text-gray-900 rounded text-lg w-full"
+            />
+        </FormField>
+        {/* Row 2: Other fields */}
+        <div className="grid grid-cols-[1fr,1fr,1.5fr,1fr,1fr,1fr] gap-3 items-start">
+            <FormField label="Speed">
+                <NumberStepper
+                    value={item.speed}
+                    onChange={(speed) => onUpdate({ ...item, speed })}
+                    step={0.1}
+                    min={0}
+                />
+            </FormField>
+            <FormField label="Incline">
+                <NumberStepper
+                    value={item.incline}
+                    onChange={(incline) => onUpdate({ ...item, incline })}
+                    min={0}
+                />
+            </FormField>
+            <FormField label="Duration">
+                <TimeInput
+                    value={item.timer}
+                    onChange={(timer) => onUpdate({ ...item, timer })}
+                />
+            </FormField>
+            <FormField label="Colour">
+                <ColorPalettePicker 
+                    itemType={itemType}
+                    selectedValue={item.color}
+                    onSelect={(color) => onUpdate({ ...item, color })}
+                />
+            </FormField>
+            <FormField label="Omit Last">
+                <div className="flex items-center justify-center h-12">
+                    <input
+                        type="checkbox"
+                        name="omitForLastSet"
+                        checked={item.omitForLastSet}
+                        onChange={handleChange}
+                        className="h-8 w-8 rounded"
+                    />
+                </div>
+            </FormField>
+            <FormField label="Actions">
+                <div className="flex items-center justify-center h-12">
+                    <button onClick={onDelete} className="p-3 text-red-500 hover:bg-gray-700 rounded-lg text-2xl">
+                        🗑️
+                    </button>
+                </div>
+            </FormField>
         </div>
-      </div>
-      <div className="flex justify-center">
-        <ColorPalettePicker 
-            itemType={itemType}
-            selectedValue={item.color}
-            onSelect={(color) => onUpdate({ ...item, color })}
-        />
-      </div>
-      <div className="flex items-center justify-center">
-          <input
-              type="checkbox"
-              name="omitForLastSet"
-              checked={item.omitForLastSet}
-              onChange={handleChange}
-              className="h-4 w-4 rounded"
-          />
-      </div>
-      <div className="text-right">
-          <button onClick={onDelete} className="p-1 text-red-500">
-              🗑️
-          </button>
-      </div>
-    </>
+    </div>
   );
 }

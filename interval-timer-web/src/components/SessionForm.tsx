@@ -85,10 +85,10 @@ export default function SessionForm({ session, setSession }: SessionFormProps) {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="p-4 bg-gray-800 rounded-lg space-y-4">
+    <div className="space-y-8">
+      <div className="p-6 bg-gray-800 rounded-xl space-y-6">
         <div>
-          <label htmlFor="session-name" className="block text-xl font-medium mb-2">
+          <label htmlFor="session-name" className="block text-2xl font-medium mb-3">
             Session Name
           </label>
           <input
@@ -96,31 +96,31 @@ export default function SessionForm({ session, setSession }: SessionFormProps) {
             type="text"
             value={session?.name || ''}
             onChange={handleNameChange}
-            className="w-full p-3 bg-white text-gray-900 rounded text-lg"
+            className="w-full p-4 bg-white text-gray-900 rounded-lg text-2xl"
             placeholder="e.g., Morning Cardio"
           />
         </div>
         <div>
-            <label htmlFor="session-description" className="block text-sm font-medium mb-1">
+            <label htmlFor="session-description" className="block text-xl font-medium mb-2">
                 Description (Optional)
             </label>
             <textarea
                 id="session-description"
                 name="description"
-                rows={3}
+                rows={4}
                 value={session?.description || ''}
                 onChange={(e) => setSession({ ...session, description: e.target.value })}
-                className="w-full p-2 bg-white text-gray-900 rounded"
+                className="w-full p-3 bg-white text-gray-900 rounded-lg text-lg"
                 placeholder="Enter any details about this workout..."
             />
         </div>
-        <div className="text-right text-lg font-bold">
+        <div className="text-right text-2xl font-bold">
             Total Time: {formatTotalTime(session?.totalTime || 0)}
         </div>
       </div>
 
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold">Workout Items</h3>
+      <div className="space-y-6">
+        <h3 className="text-2xl font-bold">Workout Items</h3>
         {session?.items?.map(item => (
           <WorkoutItemForm
             key={item.id}
@@ -133,7 +133,7 @@ export default function SessionForm({ session, setSession }: SessionFormProps) {
         ))}
         <button
             onClick={handleAddItem}
-            className="w-full py-2 px-4 border-2 border-dashed rounded-lg hover:bg-gray-700"
+            className="w-full py-4 px-4 border-2 border-dashed rounded-xl hover:bg-gray-700 text-2xl"
         >
             + Add Workout Item
         </button>

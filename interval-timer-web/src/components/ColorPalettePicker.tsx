@@ -39,21 +39,21 @@ export default function ColorPalettePicker({ itemType, selectedValue, onSelect }
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-16 h-8 rounded border-2 border-gray-500"
+        className="w-20 h-12 rounded-lg border-2 border-gray-500"
         style={{ backgroundColor: selectedValue }}
         title="Change color"
       />
 
       {/* The Popup Palette */}
       {isOpen && (
-        <div className="absolute z-10 top-10 p-3 bg-gray-600 rounded-lg shadow-xl border border-gray-500">
-            <div className="flex flex-wrap gap-2 w-28">
+        <div className="absolute z-10 top-14 p-3 bg-gray-600 rounded-lg shadow-xl border border-gray-500">
+            <div className="flex flex-wrap gap-3 w-40">
             {palette.map(color => (
                 <button
                 key={color}
                 type="button"
                 onClick={() => handleSelect(color)}
-                className={`w-8 h-8 rounded-full border-2 transition-transform duration-150 ${selectedValue === color ? 'border-white scale-110' : 'border-transparent'}`}
+                className={`w-12 h-12 rounded-full border-2 transition-transform duration-150 ${selectedValue === color ? 'border-white scale-110' : 'border-transparent'}`}
                 style={{ backgroundColor: color }}
                 title={color}
                 />
