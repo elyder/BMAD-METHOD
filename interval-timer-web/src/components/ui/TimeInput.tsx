@@ -12,7 +12,7 @@ interface TimeInputProps {
 export default function TimeInput({
   value,
   onChange,
-  step = 15,
+  step = 5,
   className = '',
 }: TimeInputProps) {
   const handleIncrement = () => {

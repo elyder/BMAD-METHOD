@@ -1,16 +1,17 @@
 'use client';
 
-import { use, useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { WorkoutSession } from '@/types';
-import { getWorkoutSession, saveWorkoutSession } from '@/lib/storage';
+import { use, useState, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { WorkoutSession, WorkoutItem, SubItem } from '@/types';
+import { getWorkoutSession, saveWorkoutSession, deleteWorkoutSession } from '@/lib/storage';
 import SessionForm from '@/components/SessionForm';
 import { WARMUP_COLORS, ACTION_COLORS, COOLDOWN_COLORS } from '@/colors';
 
 // The params object is a Promise in client components
-export default function SessionEditPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params);
-  const router = useRouter();
+function EditPageContent({ id, router }: { id: string; router: any }) {
+  const searchParams = useSearchParams();
+  const isDuplicated = searchParams.get('duplicated') === 'true';
+
   const [session, setSession] = useState<Partial<WorkoutSession> | null>(null);
 
   useEffect(() => {
@@ -23,7 +24,7 @@ export default function SessionEditPage({ params }: { params: Promise<{ id: stri
       const newSessionId = `session-${new Date().getTime()}`;
       setSession({
         id: newSessionId,
-        name: 'New Workout Session',
+        name: '',
         items: [
           {
             id: `item-${newSessionId}-1`,
@@ -76,10 +77,26 @@ export default function SessionEditPage({ params }: { params: Promise<{ id: stri
 
   const handleSave = () => {
     if (session) {
-      saveWorkoutSession(session as WorkoutSession);
-      alert('Session saved!');
+      // Validate session name
+      if (!session.name || session.name.trim() === '') {
+        alert('Please enter a session name.');
+        return;
+      }
+
+      // Create a deep copy to avoid direct state mutation before saving
+      const sessionToSave = JSON.parse(JSON.stringify(session));
+
+      saveWorkoutSession(sessionToSave as WorkoutSession);
       router.push('/');
     }
+  };
+
+  const handleCancel = () => {
+    // If it's a duplicated session that hasn't been named, delete it on cancel.
+    if (isDuplicated && (!session?.name || session.name.trim() === '')) {
+      deleteWorkoutSession(id);
+    }
+    router.push('/');
   };
 
   if (!session) {
@@ -87,13 +104,18 @@ export default function SessionEditPage({ params }: { params: Promise<{ id: stri
   }
 
   const isNew = id === 'new';
+  const pageTitle = isDuplicated
+    ? 'Duplicated Session'
+    : isNew
+    ? 'Create New Workout Session'
+    : `Edit: ${session.name}`;
 
   return (
     <main className="flex min-h-screen flex-col items-center p-6">
       <div className="w-full">
         <header className="mb-8">
             <h1 className="text-4xl font-bold">
-            {isNew ? 'Create New Workout Session' : `Edit: ${session.name}`}
+              {pageTitle}
             </h1>
         </header>
 
@@ -101,7 +123,7 @@ export default function SessionEditPage({ params }: { params: Promise<{ id: stri
 
         <div className="mt-8 flex justify-end gap-4">
           <button
-            onClick={() => router.push('/')}
+            onClick={handleCancel}
             className="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 text-xl"
           >
             Cancel
@@ -115,5 +137,16 @@ export default function SessionEditPage({ params }: { params: Promise<{ id: stri
         </div>
       </div>
     </main>
+  );
+}
+
+export default function SessionEditPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
+  const router = useRouter();
+
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <EditPageContent id={id} router={router} />
+    </Suspense>
   );
 }

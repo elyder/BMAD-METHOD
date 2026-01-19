@@ -8,6 +8,7 @@ interface NumberStepperProps {
   min?: number;
   max?: number;
   step?: number;
+  decimalPlaces?: number; // New prop for decimal places
   className?: string;
 }
 
@@ -17,15 +18,25 @@ export default function NumberStepper({
   min = -Infinity,
   max = Infinity,
   step = 1,
+  decimalPlaces, // Destructure new prop
   className = '',
 }: NumberStepperProps) {
+  const roundValue = (num: number) => {
+    if (decimalPlaces !== undefined) {
+      return parseFloat(num.toFixed(decimalPlaces));
+    }
+    return num;
+  };
+
   const handleIncrement = () => {
-    onChange(Math.min(max, value + step));
+    onChange(roundValue(Math.min(max, value + step)));
   };
 
   const handleDecrement = () => {
-    onChange(Math.max(min, value - step));
+    onChange(roundValue(Math.max(min, value - step)));
   };
+
+  const displayedValue = decimalPlaces !== undefined ? value.toFixed(decimalPlaces) : value;
 
   return (
     <div className={`flex items-center gap-2 ${className}`}>
@@ -39,11 +50,19 @@ export default function NumberStepper({
       </button>
       <input
         type="number"
-        value={value}
-        onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
+        value={displayedValue} // Use displayedValue for formatting
+        onChange={(e) => {
+          const parsedValue = parseFloat(e.target.value);
+          if (!isNaN(parsedValue)) {
+            onChange(roundValue(parsedValue));
+          } else {
+            onChange(0); // Default to 0 or handle as per design
+          }
+        }}
         className="w-20 p-2 text-center bg-white text-gray-900 rounded-lg text-lg font-semibold"
         min={min}
         max={max}
+        step={step} // Ensure step is passed to input for browser controls if any
       />
       <button
         type="button"

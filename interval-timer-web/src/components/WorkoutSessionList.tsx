@@ -26,13 +26,13 @@ export default function WorkoutSessionList() {
     const newSession: WorkoutSession = {
       ...sessionToDuplicate,
       id: `session-${new Date().getTime()}`,
-      name: `${sessionToDuplicate.name} (Copy)`,
+      name: '', // Set name to empty as requested
       createdAt: new Date().toISOString(),
     };
 
     saveWorkoutSession(newSession);
-    setSessions(getWorkoutSessions());
-    alert(`'${sessionToDuplicate.name}' was duplicated.`);
+    // Navigate to the edit page for the new session
+    router.push(`/session/edit/${newSession.id}?duplicated=true`);
   };
 
   const handleDelete = (sessionId: string) => {

@@ -41,7 +41,7 @@ export default function WorkoutItemForm({
   const handleAddSubItem = () => {
     const newSubItem: SubItem = {
       id: `sub-${item.id}-${new Date().getTime()}`,
-      description: 'New Sub-Item',
+      description: '',
       speed: item.speed,
       incline: item.incline,
       timer: 30,
@@ -103,7 +103,7 @@ export default function WorkoutItemForm({
                 
                 <div className={`${gridLayout}`}>
                     <FormField label="Speed">
-                        <NumberStepper value={item.speed} onChange={(speed) => onUpdate({ ...item, speed })} step={0.1} min={0} />
+                        <NumberStepper value={item.speed} onChange={(speed) => onUpdate({ ...item, speed })} step={0.1} min={0} decimalPlaces={1} />
                     </FormField>
                     <FormField label="Incline">
                         <NumberStepper value={item.incline} onChange={(incline) => onUpdate({ ...item, incline })} min={0} />
@@ -119,8 +119,8 @@ export default function WorkoutItemForm({
                         />
                     </FormField>
                     {/* Placeholders for grid alignment */}
-                    <FormField label="Omit Last"><span></span></FormField>
-                    <FormField label="Actions"><span></span></FormField>
+                    <FormField label=""><span></span></FormField>
+                    <FormField label=""><span></span></FormField>
                 </div>
             </div>
 
@@ -133,6 +133,7 @@ export default function WorkoutItemForm({
                             itemType={item.type}
                             onUpdate={handleUpdateSubItem}
                             onDelete={() => handleDeleteSubItem(subItem.id)}
+                            parentSets={item.sets} // New prop
                         />
                     </div>
                 ))}
