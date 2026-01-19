@@ -49,9 +49,9 @@ export default function RunSessionPage({ params }: { params: Promise<{ id: strin
 
   // Effect to initialize audio objects
   useEffect(() => {
-    endAudioRef.current = new Audio('/audio/end.wav');
-    preBeepAudioRef.current = new Audio('/audio/pre_beep.wav');
-    startBeepAudioRef.current = new Audio('/audio/start_beep.wav');
+    endAudioRef.current = new Audio('/1.wav');
+    preBeepAudioRef.current = new Audio('/2.wav');
+    startBeepAudioRef.current = new Audio('/1.wav');
     beep1AudioRef.current = new Audio('/1.wav');
     beep2AudioRef.current = new Audio('/2.wav');
   }, []);
@@ -247,7 +247,7 @@ export default function RunSessionPage({ params }: { params: Promise<{ id: strin
     <div ref={containerRef} className="w-full h-screen flex flex-col items-center justify-center bg-gray-900 text-white p-4" style={{backgroundColor: status === 'running' ? currentStep.color : '#111827'}}>
         
         <div className="w-full max-w-xl mb-4">
-            <div className="flex justify-between text-lg">
+            <div className="flex justify-between text-2xl">
                 <span>{session.name}</span>
                 <span>{formatTime(timeElapsed)} / {formatTime(totalTime)}</span>
             </div>
@@ -292,7 +292,7 @@ export default function RunSessionPage({ params }: { params: Promise<{ id: strin
             {status === 'running' && <button onClick={pauseTimer} className="px-8 py-3 bg-yellow-500 rounded-lg text-xl">Pause</button>}
             {status === 'paused' && <button onClick={startTimer} className="px-8 py-3 bg-green-500 rounded-lg text-xl">Resume</button>}
             
-            <button onClick={skip} disabled={status !== 'running' && status !== 'paused'} className="px-8 py-3 bg-gray-600 rounded-lg text-xl disabled:opacity-50">Skip</button>
+            <button onClick={skip} disabled={status !== 'running' && status !== 'paused'} className="px-8 py-3 bg-gray-600 rounded-lg text-xl disabled:opacity-50">Next</button>
             <button onClick={endSession} className="px-8 py-3 bg-red-600 rounded-lg text-xl">End</button>
         </div>
         
