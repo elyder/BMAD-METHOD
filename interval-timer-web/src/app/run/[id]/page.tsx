@@ -1,27 +1,19 @@
 'use client';
 
 import { use, useEffect, useState, useRef, useCallback } from 'react';
-
 import { useRouter } from 'next/navigation';
-
 import { getWorkoutSession, saveWorkoutSession } from '@/lib/storage';
-
 import { WorkoutSession, WorkoutItem, SubItem } from '@/types';
 import { calculatePace } from '@/lib/utils';
 
-
-
 type TimerStatus = 'idle' | 'countdown' | 'running' | 'paused' | 'finished';
 
-
-
-// A flattened list of all steps in the workout
 interface WorkoutStep {
   item: WorkoutItem;
   subItem?: SubItem;
   set: number;
-  itemName: string; // From item.title
-  description: string; // From item.description or subItem.description
+  itemName: string;
+  description: string;
   speed: number;
   incline: number;
   duration: number;
@@ -47,7 +39,6 @@ export default function RunSessionPage({ params }: { params: Promise<{ id: strin
   const beep1AudioRef = useRef<HTMLAudioElement | null>(null);
   const beep2AudioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Effect to initialize audio objects
   useEffect(() => {
     endAudioRef.current = new Audio('/1.wav');
     preBeepAudioRef.current = new Audio('/2.wav');
@@ -56,23 +47,19 @@ export default function RunSessionPage({ params }: { params: Promise<{ id: strin
     beep2AudioRef.current = new Audio('/2.wav');
   }, []);
 
-  // Load Session and build the workout plan
   useEffect(() => {
     if (!id) return;
     
     const loadedSession = getWorkoutSession(id);
     if (loadedSession) {
-      // Update last used date and save
       loadedSession.lastUsedAt = new Date().toISOString();
       saveWorkoutSession(loadedSession);
       
       setSession(loadedSession);
 
-      // --- Build the workout plan ---
       const plan: WorkoutStep[] = [];
       loadedSession.items.forEach(item => {
         for (let set = 1; set <= item.sets; set++) {
-          // Add the parent item itself if its timer is set
           if (item.timer > 0) {
             plan.push({
                 item,
@@ -86,7 +73,6 @@ export default function RunSessionPage({ params }: { params: Promise<{ id: strin
             });
           }
           
-          // Add the sub-items
           if (item.subItems && item.subItems.length > 0) {
             item.subItems.forEach(subItem => {
               if (subItem.omitForLastSet && set === item.sets) {
@@ -135,12 +121,10 @@ export default function RunSessionPage({ params }: { params: Promise<{ id: strin
     }
   }, [currentStepIndex, workoutPlan]);
   
-  // Main Timer Tick Logic
   useEffect(() => {
     if (status !== 'running') return;
 
     const interval = setInterval(() => {
-      // Play pre-beeps on 4, 3, 2 seconds remaining, to sound *before* the number changes
       if ([4, 3, 2].includes(timeRemaining)) {
         if (beep1AudioRef.current) {
             beep1AudioRef.current.play();
@@ -159,7 +143,6 @@ export default function RunSessionPage({ params }: { params: Promise<{ id: strin
     return () => clearInterval(interval);
   }, [status, timeRemaining, advance]);
   
-    // Countdown effect
     useEffect(() => {
         if (status !== 'countdown') return;
 
@@ -167,25 +150,21 @@ export default function RunSessionPage({ params }: { params: Promise<{ id: strin
         const timeouts: NodeJS.Timeout[] = [];
 
         const runCountdown = async () => {
-            // 3
             setCountdownDisplay(3);
             if (beep1AudioRef.current) await beep1AudioRef.current.play().catch(e => {});
             if (countdownCancelled) return;
             await new Promise(res => timeouts.push(setTimeout(res, 1000)));
 
-            // 2
             setCountdownDisplay(2);
             if (beep1AudioRef.current) await beep1AudioRef.current.play().catch(e => {});
             if (countdownCancelled) return;
             await new Promise(res => timeouts.push(setTimeout(res, 1000)));
 
-            // 1
             setCountdownDisplay(1);
             if (beep1AudioRef.current) await beep1AudioRef.current.play().catch(e => {});
             if (countdownCancelled) return;
             await new Promise(res => timeouts.push(setTimeout(res, 1000)));
 
-            // 0
             setCountdownDisplay(null);
             if (beep2AudioRef.current) await beep2AudioRef.current.play().catch(e => {});
             setStatus('running');
@@ -197,7 +176,7 @@ export default function RunSessionPage({ params }: { params: Promise<{ id: strin
           countdownCancelled = true;
           timeouts.forEach(clearTimeout);
         };
-    }, [status]); // Only runs when status changes to 'countdown'
+    }, [status]);
 
   const startTimer = () => {
     if (startBeepAudioRef.current?.paused) {
@@ -216,7 +195,6 @@ export default function RunSessionPage({ params }: { params: Promise<{ id: strin
   const pauseTimer = () => setStatus('paused');
 
   const skip = () => {
-    // When skipping, advance the elapsed time by the amount of time remaining
     advance(timeRemaining);
   };
   
@@ -257,43 +235,62 @@ export default function RunSessionPage({ params }: { params: Promise<{ id: strin
         </div>
 
         {/* New Container for Text Content */}
-        <div className="flex flex-col items-center justify-center bg-gray-800 text-white p-8 rounded-lg shadow-lg max-w-xl w-full" style={{height: '60vh'}}>
+        <div className="relative flex flex-col items-center justify-center bg-gray-800 text-white p-8 rounded-lg shadow-lg max-w-xl w-full" style={{height: '60vh'}}>
+            {currentStep.item.sets > 1 && (
+                <p className="absolute top-4 right-4 text-xl text-gray-300">Set {currentStep.set} of {currentStep.item.sets}</p>
+            )}
             {/* Main Timer Display */}
-            <div className="text-center">
-                {currentStep.description && <p className="text-3xl text-white mt-2">{currentStep.description}</p>}
-                {currentStep.item.sets > 1 && (
-                    <p className="text-xl text-gray-300">Set {currentStep.set} of {currentStep.item.sets}</p>
-                )}
-                                        {(currentStep.speed > 0 || currentStep.incline > 0) && (
-                                            <div className="text-2xl text-gray-300 mt-4">
-                                                {currentStep.speed > 0 && (
-                                                    <p>
-                                                        {currentStep.speed} km/t
-                                                        {session.showPace && ` (${calculatePace(currentStep.speed)}/km)`}
-                                                    </p>
-                                                )}
-                                                {currentStep.incline > 0 && <p>{currentStep.incline}% incline</p>}
-                                            </div>
-                                        )}                <div className="text-9xl font-mono my-8">
+            <div className="text-center w-full">
+                {currentStep.description && <p className="text-5xl text-white mt-2 mb-16">{currentStep.description}</p>}
+                
+                {/* Speed, Pace, Incline */}
+                <div className="w-full text-2xl text-gray-300 mt-4">
+                    <div className="flex justify-between items-center">
+                        <div className="w-1/3 text-left">
+                            {currentStep.speed > 0 && <span>{currentStep.speed} km/t</span>}
+                        </div>
+                        <div className="w-1/3 text-center">
+                            {(currentStep.speed > 0 && session.showPace) && <span className="text-lg text-gray-500">({calculatePace(currentStep.speed)}/km)</span>}
+                        </div>
+                        <div className="w-1/3 text-right">
+                            {currentStep.incline > 0 && <span>{currentStep.incline}% incline</span>}
+                        </div>
+                    </div>
+                </div>
+
+                <div className="text-9xl font-mono my-8">
                     {formatTime(timeRemaining)}
                 </div>
             </div>
 
             {/* Next Up */}
-            <div className="mt-8 text-center">
-                <p className="text-gray-400">Next up:</p>
-                <p className="text-2xl">{nextStep ? (nextStep.description || nextStep.itemName) : 'Finished!'}</p>
-            </div>
+            {nextStep && (
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-center text-gray-500">
+                    <p className="text-2xl">Next up: {nextStep.description || nextStep.itemName}</p>
+                    <p className="text-2xl">
+                        {nextStep.speed > 0 && <span>{nextStep.speed} km/t</span>}
+                        {nextStep.incline > 0 && <span className="ml-2">{nextStep.incline}% incline</span>}
+                    </p>
+                </div>
+            )}
         </div>
 
         {/* Controls */}
         <div className="flex gap-4 mt-8">
             {status === 'idle' && <button onClick={startTimer} className="px-8 py-3 bg-green-500 rounded-lg text-xl font-bold">START</button>}
-            {status === 'running' && <button onClick={pauseTimer} className="px-8 py-3 bg-yellow-500 rounded-lg text-xl">Pause</button>}
-            {status === 'paused' && <button onClick={startTimer} className="px-8 py-3 bg-green-500 rounded-lg text-xl">Resume</button>}
-            
-            <button onClick={skip} disabled={status !== 'running' && status !== 'paused'} className="px-8 py-3 bg-gray-600 rounded-lg text-xl disabled:opacity-50">Next</button>
-            <button onClick={endSession} className="px-8 py-3 bg-red-600 rounded-lg text-xl">End</button>
+            {status === 'running' &&
+                <>
+                    <button onClick={pauseTimer} className="px-8 py-3 bg-yellow-500 rounded-lg text-xl">Pause</button>
+                    <button onClick={skip} className="px-8 py-3 bg-gray-600 rounded-lg text-xl">Next</button>
+                </>
+            }
+            {status === 'paused' &&
+                <>
+                    <button onClick={startTimer} className="px-8 py-3 bg-green-500 rounded-lg text-xl">Resume</button>
+                    <button onClick={skip} className="px-8 py-3 bg-gray-600 rounded-lg text-xl">Next</button>
+                    <button onClick={endSession} className="px-8 py-3 bg-red-600 rounded-lg text-xl">End</button>
+                </>
+            }
         </div>
         
         {status === 'countdown' && countdownDisplay !== null && (
