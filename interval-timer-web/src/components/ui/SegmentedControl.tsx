@@ -18,13 +18,16 @@ export default function SegmentedControl<T extends string>({
   className = '',
 }: SegmentedControlProps<T>) {
   return (
-    <div className={`flex items-center p-1 bg-gray-700 rounded-lg ${className}`}>
+    <div
+      className={`grid items-center p-1 bg-gray-700 rounded-lg w-full ${className}`}
+      style={{ gridTemplateColumns: `repeat(${options.length}, minmax(0, 1fr))` }}
+    >
       {options.map((option) => (
         <button
           key={option}
           type="button"
           onClick={() => onChange(option)}
-          className={`flex-1 px-3 py-2 text-center rounded-md text-base font-semibold transition-colors
+          className={`w-full px-4 py-2 text-center rounded-md text-base font-semibold transition-colors
             ${value === option ? `${selectedColorClass} text-white` : 'bg-transparent text-gray-300 hover:bg-gray-600'
             }`}
         >

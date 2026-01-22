@@ -5,6 +5,7 @@ import React, { useEffect } from 'react';
 import WorkoutItemForm from './WorkoutItemForm';
 import { calculateTotalTime, formatTotalTime } from '../lib/utils';
 import { ACTION_COLORS } from '../colors';
+import { useLanguage } from './LanguageProvider';
 
 interface SessionFormProps {
   session: Partial<WorkoutSession>;
@@ -12,6 +13,7 @@ interface SessionFormProps {
 }
 
 export default function SessionForm({ session, setSession }: SessionFormProps) {
+  const { t } = useLanguage();
   // Recalculate total time whenever items change
   useEffect(() => {
     if (session?.items) {
@@ -89,7 +91,7 @@ export default function SessionForm({ session, setSession }: SessionFormProps) {
       <div className="p-6 bg-gray-800 rounded-xl space-y-6">
         <div>
           <label htmlFor="session-name" className="block text-2xl font-medium mb-3">
-            Session Name
+            {t('session_name')}
           </label>
           <input
             id="session-name"
@@ -97,12 +99,12 @@ export default function SessionForm({ session, setSession }: SessionFormProps) {
             value={session?.name || ''}
             onChange={handleNameChange}
             className="w-full p-4 bg-white text-gray-900 rounded-lg text-2xl"
-            placeholder="e.g., Morning Cardio"
+            placeholder={t('session_name_placeholder')}
           />
         </div>
         <div>
             <label htmlFor="session-description" className="block text-xl font-medium mb-2">
-                Description (Optional)
+                {t('description_optional')}
             </label>
             <textarea
                 id="session-description"
@@ -111,16 +113,16 @@ export default function SessionForm({ session, setSession }: SessionFormProps) {
                 value={session?.description || ''}
                 onChange={(e) => setSession({ ...session, description: e.target.value })}
                 className="w-full p-3 bg-white text-gray-900 rounded-lg text-lg"
-                placeholder="Enter any details about this workout..."
+                placeholder={t('description_placeholder')}
             />
         </div>
         <div className="text-right text-2xl font-bold">
-            Total Time: {formatTotalTime(session?.totalTime || 0)}
+            {t('total_time')}: {formatTotalTime(session?.totalTime || 0)}
         </div>
       </div>
 
       <div className="space-y-6">
-        <h3 className="text-2xl font-bold">Workout Items</h3>
+        <h3 className="text-2xl font-bold">{t('workout_items')}</h3>
         {session?.items?.map(item => (
           <WorkoutItemForm
             key={item.id}
@@ -135,7 +137,7 @@ export default function SessionForm({ session, setSession }: SessionFormProps) {
             onClick={handleAddItem}
             className="w-full py-4 px-4 border-2 border-dashed rounded-xl hover:bg-gray-700 text-2xl"
         >
-            + Add Workout Item
+            {t('add_workout_item')}
         </button>
       </div>
     </div>

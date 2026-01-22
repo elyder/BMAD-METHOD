@@ -1,14 +1,18 @@
+'use client';
+
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
+import { useLanguage } from '@/components/LanguageProvider';
 import WorkoutSessionList from '@/components/WorkoutSessionList';
 
 export default function Home() {
+  const { t } = useLanguage();
+
   return (
-    <main className="flex min-h-screen flex-col items-center p-6">
-      <div className="w-full">
-        <h1 className="text-4xl sm:text-5xl font-bold mb-8 text-center">
-          Workout Interval Timer
-        </h1>
-        <WorkoutSessionList />
+    <main className="container mx-auto p-4">
+      <div className="flex justify-end items-center mb-4">
+        <LanguageSwitcher />
       </div>
+      <WorkoutSessionList />
     </main>
   );
 }

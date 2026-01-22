@@ -9,6 +9,7 @@ import SegmentedControl from './ui/SegmentedControl';
 import NumberStepper from './ui/NumberStepper';
 import TimeInput from './ui/TimeInput';
 import FormField from './ui/FormField';
+import { useLanguage } from './LanguageProvider';
 
 const itemTypes: readonly WorkoutItemType[] = ['Warm-up', 'Work-out', 'Cool-down'];
 
@@ -27,15 +28,24 @@ export default function WorkoutItemForm({
   onMove,
   onDuplicate,
 }: WorkoutItemFormProps) {
+  const { t } = useLanguage();
+  const translatedItemTypes = [t('warm_up'), t('work_out'), t('cool_down')];
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     onUpdate({ ...item, [name]: value });
   };
   
-  const handleTypeChange = (newType: WorkoutItemType) => {
-    const newPalette = COLOR_PALETTES[newType] || [];
-    onUpdate({ ...item, type: newType, color: newPalette[0] || '#FFFFFF' });
+  const handleTypeChange = (newTypeTranslated: string) => {
+    // Map translated type back to original enum key
+    const originalType = 
+      newTypeTranslated === t('warm_up') ? 'Warm-up' :
+      newTypeTranslated === t('work_out') ? 'Work-out' :
+      newTypeTranslated === t('cool_down') ? 'Cool-down' :
+      'Work-out'; // Default fallback
+
+    const newPalette = COLOR_PALETTES[originalType] || [];
+    onUpdate({ ...item, type: originalType as WorkoutItemType, color: newPalette[0] || '#FFFFFF' });
   };
 
   const handleAddSubItem = () => {
@@ -102,13 +112,13 @@ export default function WorkoutItemForm({
         <div className="flex justify-between items-center gap-4">
             <div className="flex items-center gap-6">
                 <SegmentedControl
-                    options={itemTypes}
-                    value={item.type}
+                    options={translatedItemTypes}
+                    value={t(item.type === 'Warm-up' ? 'warm_up' : item.type === 'Work-out' ? 'work_out' : 'cool_down')}
                     onChange={handleTypeChange}
                     selectedColorClass={segmentSelectedColorClass}
                 />
                 <div className="flex items-center gap-2">
-                    <label className="text-lg font-medium">Sets:</label>
+                    <label className="text-lg font-medium">{t('sets')}:</label>
                     <NumberStepper
                         value={item.sets}
                         onChange={(sets) => onUpdate({ ...item, sets })}
@@ -117,10 +127,10 @@ export default function WorkoutItemForm({
                 </div>
             </div>
             <div className="flex items-center gap-2">
-                <button onClick={() => onMove('up')} className="p-3 hover:bg-gray-700 rounded-lg text-2xl" title="Move Up">⬆️</button>
-                <button onClick={() => onMove('down')} className="p-3 hover:bg-gray-700 rounded-lg text-2xl" title="Move Down">⬇️</button>
-                <button onClick={onDuplicate} className="p-3 hover:bg-gray-700 rounded-lg text-2xl" title="Duplicate">📋</button>
-                <button onClick={onDelete} className="p-3 text-red-500 hover:bg-gray-700 rounded-lg text-2xl" title="Delete">❌</button>
+                <button onClick={() => onMove('up')} className="p-3 hover:bg-gray-700 rounded-lg text-2xl" title={t('move_up')}>⬆️</button>
+                <button onClick={() => onMove('down')} className="p-3 hover:bg-gray-700 rounded-lg text-2xl" title={t('move_down')}>⬇️</button>
+                <button onClick={onDuplicate} className="p-3 hover:bg-gray-700 rounded-lg text-2xl" title={t('duplicate')}>📋</button>
+                <button onClick={onDelete} className="p-3 text-red-500 hover:bg-gray-700 rounded-lg text-2xl" title={t('delete')}>❌</button>
             </div>
         </div>
 
@@ -128,21 +138,21 @@ export default function WorkoutItemForm({
         <div className="space-y-4">
             {/* Main Item Data */}
             <div className="space-y-3 p-3 border border-gray-600 rounded-lg bg-gray-900">
-                <FormField label="Description">
-                    <textarea name="description" value={item.description} onChange={handleChange} placeholder="Item description" rows={2} className="p-2 bg-white text-gray-900 rounded text-lg w-full" />
+                <FormField label={t('description')}>
+                    <textarea name="description" value={item.description} onChange={handleChange} placeholder={t('item_description_placeholder')} rows={2} className="p-2 bg-white text-gray-900 rounded text-lg w-full" />
                 </FormField>
                 
                 <div className={`${gridLayout}`}>
-                    <FormField label="Speed">
+                    <FormField label={t('speed')}>
                         <NumberStepper value={item.speed} onChange={(speed) => onUpdate({ ...item, speed })} step={0.1} min={0} decimalPlaces={1} />
                     </FormField>
-                    <FormField label="Incline">
+                    <FormField label={t('incline')}>
                         <NumberStepper value={item.incline} onChange={(incline) => onUpdate({ ...item, incline })} min={0} />
                     </FormField>
-                    <FormField label="Duration">
+                    <FormField label={t('duration')}>
                         <TimeInput value={item.timer} onChange={(timer) => onUpdate({ ...item, timer })} />
                     </FormField>
-                    <FormField label="Colour">
+                    <FormField label={t('color')}>
                         <ColorPalettePicker 
                             itemType={item.type}
                             selectedValue={item.color}
@@ -177,7 +187,7 @@ export default function WorkoutItemForm({
                 onClick={handleAddSubItem}
                 className="w-full py-3 px-4 text-lg border border-dashed border-gray-500 rounded-lg hover:bg-gray-700"
             >
-                + Add Sub-Item
+                {t('add_sub_item')}
             </button>
         </div>
     </div>

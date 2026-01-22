@@ -1,19 +1,25 @@
-import type { Metadata } from 'next'
-import './globals.css'
+'use client';
 
-export const metadata: Metadata = {
-  title: 'Interval Timer',
-  description: 'Workout interval timer with local storage',
+import './globals.css';
+import { LanguageProvider, useLanguage } from '../components/LanguageProvider';
+
+function App({ children }: { children: React.ReactNode }) {
+  const { language } = useLanguage();
+  return (
+    <html lang={language}>
+      <body>{children}</body>
+    </html>
+  );
 }
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body>{children}</body>
-    </html>
-  )
+    <LanguageProvider>
+      <App>{children}</App>
+    </LanguageProvider>
+  );
 }

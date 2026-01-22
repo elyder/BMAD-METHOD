@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { getWorkoutSession, saveWorkoutSession } from '@/lib/storage';
 import { WorkoutSession, WorkoutItem, SubItem } from '@/types';
 import { calculatePace } from '@/lib/utils';
+import { useLanguage } from '@/components/LanguageProvider';
 
 type TimerStatus = 'idle' | 'countdown' | 'running' | 'paused' | 'finished';
 
@@ -22,6 +23,7 @@ interface WorkoutStep {
 
 export default function RunSessionPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
+  const { t } = useLanguage();
   const router = useRouter();
   const [session, setSession] = useState<WorkoutSession | null>(null);
   const [status, setStatus] = useState<TimerStatus>('idle');
@@ -102,10 +104,10 @@ export default function RunSessionPage({ params }: { params: Promise<{ id: strin
         setTimeRemaining(plan[0].duration);
       }
     } else {
-      alert('Session not found!');
+      alert(t('session_not_found'));
       router.push('/');
     }
-  }, [id, router]);
+  }, [id, router, t]);
 
   const advance = useCallback((timeSkipped: number = 0) => {
     setTimeElapsed(prev => prev + timeSkipped);
@@ -199,7 +201,7 @@ export default function RunSessionPage({ params }: { params: Promise<{ id: strin
   };
   
   const endSession = () => {
-    if (window.confirm('Are you sure you want to end this session?')) {
+    if (window.confirm(t('end_session_confirm'))) {
         if (document.fullscreenElement) {
             document.exitFullscreen();
         }
@@ -208,7 +210,7 @@ export default function RunSessionPage({ params }: { params: Promise<{ id: strin
   }
 
   if (!session || workoutPlan.length === 0) {
-    return <div>Loading Session...</div>;
+    return <div>{t('loading_session')}</div>;
   }
   
   const currentStep = workoutPlan[currentStepIndex];
@@ -237,7 +239,7 @@ export default function RunSessionPage({ params }: { params: Promise<{ id: strin
         {/* New Container for Text Content */}
         <div className="relative flex flex-col items-center justify-center bg-gray-800 text-white p-8 rounded-lg shadow-lg max-w-xl w-full" style={{height: '60vh'}}>
             {currentStep.item.sets > 1 && (
-                <p className="absolute top-4 right-4 text-xl text-gray-300">Set {currentStep.set} of {currentStep.item.sets}</p>
+                <p className="absolute top-4 right-4 text-xl text-gray-300">{t('set_of', { current: currentStep.set, total: currentStep.item.sets })}</p>
             )}
             {/* Main Timer Display */}
             <div className="text-center w-full">
@@ -253,7 +255,7 @@ export default function RunSessionPage({ params }: { params: Promise<{ id: strin
                             {(currentStep.speed > 0 && session.showPace) && <span className="text-lg text-gray-500">({calculatePace(currentStep.speed)}/km)</span>}
                         </div>
                         <div className="w-1/3 text-right">
-                            {currentStep.incline > 0 && <span>{currentStep.incline}% incline</span>}
+                            {currentStep.incline > 0 && <span>{currentStep.incline}% {t('incline')}</span>}
                         </div>
                     </div>
                 </div>
@@ -266,10 +268,10 @@ export default function RunSessionPage({ params }: { params: Promise<{ id: strin
             {/* Next Up */}
             {nextStep && (
                 <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-center text-gray-500">
-                    <p className="text-2xl">Next up: {nextStep.description || nextStep.itemName}</p>
+                    <p className="text-2xl">{t('next_up')}: {nextStep.description || nextStep.itemName}</p>
                     <p className="text-2xl">
                         {nextStep.speed > 0 && <span>{nextStep.speed} km/t</span>}
-                        {nextStep.incline > 0 && <span className="ml-2">{nextStep.incline}% incline</span>}
+                        {nextStep.incline > 0 && <span className="ml-2">{nextStep.incline}% {t('incline')}</span>}
                     </p>
                 </div>
             )}
@@ -277,18 +279,18 @@ export default function RunSessionPage({ params }: { params: Promise<{ id: strin
 
         {/* Controls */}
         <div className="flex gap-4 mt-8">
-            {status === 'idle' && <button onClick={startTimer} className="px-8 py-3 bg-green-500 rounded-lg text-xl font-bold">START</button>}
+            {status === 'idle' && <button onClick={startTimer} className="px-8 py-3 bg-green-500 rounded-lg text-xl font-bold">{t('start')}</button>}
             {status === 'running' &&
                 <>
-                    <button onClick={pauseTimer} className="px-8 py-3 bg-yellow-500 rounded-lg text-xl">Pause</button>
-                    <button onClick={skip} className="px-8 py-3 bg-gray-600 rounded-lg text-xl">Next</button>
+                    <button onClick={pauseTimer} className="px-8 py-3 bg-yellow-500 rounded-lg text-xl">{t('pause')}</button>
+                    <button onClick={skip} className="px-8 py-3 bg-gray-600 rounded-lg text-xl">{t('next')}</button>
                 </>
             }
             {status === 'paused' &&
                 <>
-                    <button onClick={startTimer} className="px-8 py-3 bg-green-500 rounded-lg text-xl">Resume</button>
-                    <button onClick={skip} className="px-8 py-3 bg-gray-600 rounded-lg text-xl">Next</button>
-                    <button onClick={endSession} className="px-8 py-3 bg-red-600 rounded-lg text-xl">End</button>
+                    <button onClick={startTimer} className="px-8 py-3 bg-green-500 rounded-lg text-xl">{t('resume')}</button>
+                    <button onClick={skip} className="px-8 py-3 bg-gray-600 rounded-lg text-xl">{t('next')}</button>
+                    <button onClick={endSession} className="px-8 py-3 bg-red-600 rounded-lg text-xl">{t('end')}</button>
                 </>
             }
         </div>
@@ -301,8 +303,8 @@ export default function RunSessionPage({ params }: { params: Promise<{ id: strin
 
         {status === 'finished' && (
             <div className="absolute inset-0 bg-black bg-opacity-80 flex flex-col justify-center items-center">
-                <h2 className="text-5xl font-bold">Workout Complete!</h2>
-                <button onClick={() => router.push('/')} className="mt-8 px-8 py-4 bg-blue-500 rounded-lg text-2xl">Back to Home</button>
+                <h2 className="text-5xl font-bold">{t('workout_complete')}</h2>
+                <button onClick={() => router.push('/')} className="mt-8 px-8 py-4 bg-blue-500 rounded-lg text-2xl">{t('back_to_home')}</button>
             </div>
         )}
     </div>

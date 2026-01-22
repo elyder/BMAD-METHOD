@@ -6,6 +6,7 @@ import ColorPalettePicker from './ColorPalettePicker';
 import NumberStepper from './ui/NumberStepper';
 import TimeInput from './ui/TimeInput';
 import FormField from './ui/FormField';
+import { useLanguage } from './LanguageProvider';
 
 interface SubItemFormProps {
   item: SubItem;
@@ -16,6 +17,7 @@ interface SubItemFormProps {
 }
 
 export default function SubItemForm({ item, itemType, onUpdate, onDelete, parentSets }: SubItemFormProps) {
+  const { t } = useLanguage();
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
     const isCheckbox = type === 'checkbox';
@@ -26,19 +28,19 @@ export default function SubItemForm({ item, itemType, onUpdate, onDelete, parent
   return (
     <div className="w-full space-y-3 p-3 border border-gray-600 rounded-lg bg-gray-800">
         {/* Row 1: Description */}
-        <FormField label="Description">
+        <FormField label={t('description')}>
             <textarea
                 name="description"
                 value={item.description}
                 onChange={handleChange}
-                placeholder="Item description"
+                placeholder={t('item_description_placeholder')}
                 rows={2}
                 className="p-2 bg-white text-gray-900 rounded text-lg w-full"
             />
         </FormField>
         {/* Row 2: Speed, Incline, Duration, Colour */}
         <div className="grid grid-cols-[1fr,1fr,1.5fr,1fr,1fr,1fr] gap-3 items-start">
-            <FormField label="Speed">
+            <FormField label={t('speed')}>
                 <NumberStepper
                     value={item.speed}
                     onChange={(speed) => onUpdate({ ...item, speed })}
@@ -47,20 +49,20 @@ export default function SubItemForm({ item, itemType, onUpdate, onDelete, parent
                     decimalPlaces={1}
                 />
             </FormField>
-            <FormField label="Incline">
+            <FormField label={t('incline')}>
                 <NumberStepper
                     value={item.incline}
                     onChange={(incline) => onUpdate({ ...item, incline })}
                     min={0}
                 />
             </FormField>
-            <FormField label="Duration">
+            <FormField label={t('duration')}>
                 <TimeInput
                     value={item.timer}
                     onChange={(timer) => onUpdate({ ...item, timer })}
                 />
             </FormField>
-            <FormField label="Colour">
+            <FormField label={t('color')}>
                 <ColorPalettePicker 
                     itemType={itemType}
                     selectedValue={item.color}
@@ -82,10 +84,10 @@ export default function SubItemForm({ item, itemType, onUpdate, onDelete, parent
                         onChange={handleChange}
                         className="h-8 w-8 rounded"
                     />
-                    Omit this item during last set
+                    {t('omit_for_last_set')}
                 </label>
             )}
-            <button onClick={onDelete} className="p-3 text-red-500 hover:bg-gray-700 rounded-lg text-2xl" title="Delete">
+            <button onClick={onDelete} className="p-3 text-red-500 hover:bg-gray-700 rounded-lg text-2xl" title={t('delete')}>
                 🗑️
             </button>
         </div>

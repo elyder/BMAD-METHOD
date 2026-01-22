@@ -6,9 +6,11 @@ import { WorkoutSession, WorkoutItem, SubItem } from '@/types';
 import { getWorkoutSession, saveWorkoutSession, deleteWorkoutSession } from '@/lib/storage';
 import SessionForm from '@/components/SessionForm';
 import { WARMUP_COLORS, ACTION_COLORS, COOLDOWN_COLORS } from '@/colors';
+import { useLanguage } from '@/components/LanguageProvider';
 
 // The params object is a Promise in client components
 function EditPageContent({ id, router }: { id: string; router: any }) {
+  const { t } = useLanguage();
   const searchParams = useSearchParams();
   const isDuplicated = searchParams.get('duplicated') === 'true';
 
@@ -69,17 +71,17 @@ function EditPageContent({ id, router }: { id: string; router: any }) {
       if (existingSession) {
         setSession(existingSession);
       } else {
-        alert('Session not found!');
+        alert(t('session_not_found'));
         router.push('/');
       }
     }
-  }, [id, router]);
+  }, [id, router, t]);
 
   const handleSave = () => {
     if (session) {
       // Validate session name
       if (!session.name || session.name.trim() === '') {
-        alert('Please enter a session name.');
+        alert(t('enter_session_name'));
         return;
       }
 
@@ -100,15 +102,15 @@ function EditPageContent({ id, router }: { id: string; router: any }) {
   };
 
   if (!session) {
-    return <div>Loading...</div>;
+    return <div>{t('loading')}</div>;
   }
 
   const isNew = id === 'new';
   const pageTitle = isDuplicated
-    ? 'Duplicated Session'
+    ? t('duplicated_session')
     : isNew
-    ? 'Create New Workout Session'
-    : `Edit: ${session.name}`;
+    ? t('create_new_workout_session')
+    : `${t('edit')}: ${session.name}`;
 
   return (
     <main className="flex min-h-screen flex-col items-center p-6">
@@ -126,13 +128,13 @@ function EditPageContent({ id, router }: { id: string; router: any }) {
             onClick={handleCancel}
             className="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 text-xl"
           >
-            Cancel
+            {t('cancel')}
           </button>
           <button
             onClick={handleSave}
             className="px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 text-xl"
           >
-            Save Session
+            {t('save_session')}
           </button>
         </div>
       </div>
@@ -143,9 +145,10 @@ function EditPageContent({ id, router }: { id: string; router: any }) {
 export default function SessionEditPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const router = useRouter();
+  const { t } = useLanguage();
 
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<div>{t('loading')}</div>}>
       <EditPageContent id={id} router={router} />
     </Suspense>
   );
