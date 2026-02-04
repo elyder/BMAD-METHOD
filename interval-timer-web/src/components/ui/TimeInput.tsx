@@ -40,7 +40,7 @@ export default function TimeInput({
   };
 
   const parseTimeString = (timeStr: string): number => {
-    // Handle various formats: "1:30", "01:30", "90", "5"
+    // Handle various formats
     const trimmed = timeStr.trim();
 
     if (trimmed.includes(':')) {
@@ -50,11 +50,25 @@ export default function TimeInput({
 
     // If no colon, interpret based on length:
     // 1-2 digits: treat as minutes (e.g., "5" = 5 min, "30" = 30 min)
-    // 3+ digits: treat as seconds (e.g., "90" = 90 sec, "120" = 120 sec)
+    // 3 digits: first digit is minutes, last two are seconds (e.g., "230" = 2:30)
+    // 4 digits: first two are minutes, last two are seconds (e.g., "0230" = 2:30, "1030" = 10:30)
     const num = parseInt(trimmed, 10);
     if (isNaN(num)) return 0;
 
-    return trimmed.length <= 2 ? num * 60 : num;
+    if (trimmed.length <= 2) {
+      return num * 60;
+    } else if (trimmed.length === 3) {
+      const minutes = parseInt(trimmed.slice(0, 1), 10);
+      const seconds = parseInt(trimmed.slice(1), 10);
+      return (minutes * 60) + seconds;
+    } else if (trimmed.length === 4) {
+      const minutes = parseInt(trimmed.slice(0, 2), 10);
+      const seconds = parseInt(trimmed.slice(2), 10);
+      return (minutes * 60) + seconds;
+    }
+
+    // 5+ digits: treat as total seconds
+    return num;
   };
 
   const commitValue = () => {
