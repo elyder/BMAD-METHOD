@@ -27,7 +27,7 @@ export default function SegmentedControl<T extends string>({
           key={option}
           type="button"
           onClick={() => onChange(option)}
-          className={`w-full px-4 py-2 text-center rounded-md text-base font-semibold transition-colors
+          className={`w-full px-2 py-2.5 text-center rounded-md text-sm md:text-base font-semibold transition-colors whitespace-nowrap
             ${value === option ? `${selectedColorClass} text-white` : 'bg-transparent text-gray-300 hover:bg-gray-600'
             }`}
         >

@@ -22,6 +22,8 @@ export default [
       'build/**',
       // Website uses ESM/Astro - separate linting ecosystem
       'website/**',
+      // Next.js interval timer app - separate linting ecosystem
+      'interval-timer-web/**',
       // Gitignored patterns
       'z*/**', // z-samples, z1, z2, etc.
       '.claude/**',

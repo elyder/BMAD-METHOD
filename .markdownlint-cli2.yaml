@@ -3,6 +3,7 @@
 
 ignores:
   - node_modules/**
+  - interval-timer-web/**
   - test/fixtures/**
   - CODE_OF_CONDUCT.md
   - _bmad/**

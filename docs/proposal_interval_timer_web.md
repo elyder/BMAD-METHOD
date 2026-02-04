@@ -9,7 +9,7 @@ There are many different apps available for training with intervals, but i not f
 ----
 
 ## Purpose
-The goal is to build a web page that will allow me to set up, store and run different training intervals according to a users own needs. The web pages shall be published within a separate folder on an existing website, but accessed only through a direct URL entered into the browser: https://mittatelier.no/intervall
+The goal is to build a web page that will allow me to set up, store and run different training intervals according to a users own needs. The web pages shall be published within a separate folder on an existing website, but accessed only through a direct URL entered into the browser: <https://mittatelier.no/intervall>
 
 ----
 
