@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface TimeInputProps {
   value: number; // Total seconds
@@ -15,6 +15,22 @@ export default function TimeInput({
   step = 5,
   className = '',
 }: TimeInputProps) {
+  const formatTime = (totalSeconds: number) => {
+    const minutes = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
+    const seconds = (totalSeconds % 60).toString().padStart(2, '0');
+    return `${minutes}:${seconds}`;
+  };
+
+  const [localValue, setLocalValue] = useState(formatTime(value));
+  const [isFocused, setIsFocused] = useState(false);
+
+  // Sync local value when external value changes (but not while editing)
+  useEffect(() => {
+    if (!isFocused) {
+      setLocalValue(formatTime(value));
+    }
+  }, [value, isFocused]);
+
   const handleIncrement = () => {
     onChange(value + step);
   };
@@ -23,15 +39,40 @@ export default function TimeInput({
     onChange(Math.max(0, value - step));
   };
 
-  const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const [minutes, seconds] = e.target.value.split(':').map(str => parseInt(str, 10) || 0);
-    onChange((minutes * 60) + seconds);
+  const parseTimeString = (timeStr: string): number => {
+    // Handle various formats: "1:30", "01:30", "90" (seconds only), "1.5" (minutes)
+    const trimmed = timeStr.trim();
+
+    if (trimmed.includes(':')) {
+      const [minutes, seconds] = trimmed.split(':').map(str => parseInt(str, 10) || 0);
+      return (minutes * 60) + seconds;
+    }
+
+    // If no colon, treat as total seconds
+    const num = parseInt(trimmed, 10);
+    return isNaN(num) ? 0 : num;
   };
 
-  const formatTime = (totalSeconds: number) => {
-    const minutes = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
-    const seconds = (totalSeconds % 60).toString().padStart(2, '0');
-    return `${minutes}:${seconds}`;
+  const commitValue = () => {
+    const newValue = parseTimeString(localValue);
+    onChange(Math.max(0, newValue));
+    setLocalValue(formatTime(Math.max(0, newValue)));
+  };
+
+  const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+    setIsFocused(true);
+    e.target.select();
+  };
+
+  const handleBlur = () => {
+    setIsFocused(false);
+    commitValue();
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.currentTarget.blur();
+    }
   };
 
   return (
@@ -45,8 +86,12 @@ export default function TimeInput({
       </button>
       <input
         type="text"
-        value={formatTime(value)}
-        onChange={handleTimeChange}
+        inputMode="numeric"
+        value={localValue}
+        onChange={(e) => setLocalValue(e.target.value)}
+        onFocus={handleFocus}
+        onBlur={handleBlur}
+        onKeyDown={handleKeyDown}
         className="w-24 p-2 text-center bg-white text-gray-900 rounded-lg text-lg font-semibold tabular-nums"
         placeholder="mm:ss"
       />

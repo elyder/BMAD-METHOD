@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface NumberStepperProps {
   value: number;
@@ -8,7 +8,7 @@ interface NumberStepperProps {
   min?: number;
   max?: number;
   step?: number;
-  decimalPlaces?: number; // New prop for decimal places
+  decimalPlaces?: number;
   className?: string;
 }
 
@@ -18,9 +18,23 @@ export default function NumberStepper({
   min = -Infinity,
   max = Infinity,
   step = 1,
-  decimalPlaces, // Destructure new prop
+  decimalPlaces,
   className = '',
 }: NumberStepperProps) {
+  const formatValue = (num: number) => {
+    return decimalPlaces !== undefined ? num.toFixed(decimalPlaces) : String(num);
+  };
+
+  const [localValue, setLocalValue] = useState(formatValue(value));
+  const [isFocused, setIsFocused] = useState(false);
+
+  // Sync local value when external value changes (but not while editing)
+  useEffect(() => {
+    if (!isFocused) {
+      setLocalValue(formatValue(value));
+    }
+  }, [value, isFocused, decimalPlaces]);
+
   const roundValue = (num: number) => {
     if (decimalPlaces !== undefined) {
       return parseFloat(num.toFixed(decimalPlaces));
@@ -28,15 +42,40 @@ export default function NumberStepper({
     return num;
   };
 
+  const clampValue = (num: number) => {
+    return Math.min(max, Math.max(min, num));
+  };
+
   const handleIncrement = () => {
-    onChange(roundValue(Math.min(max, value + step)));
+    onChange(roundValue(clampValue(value + step)));
   };
 
   const handleDecrement = () => {
-    onChange(roundValue(Math.max(min, value - step)));
+    onChange(roundValue(clampValue(value - step)));
   };
 
-  const displayedValue = decimalPlaces !== undefined ? value.toFixed(decimalPlaces) : value;
+  const commitValue = () => {
+    const parsed = parseFloat(localValue);
+    const newValue = isNaN(parsed) ? min : roundValue(clampValue(parsed));
+    onChange(newValue);
+    setLocalValue(formatValue(newValue));
+  };
+
+  const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+    setIsFocused(true);
+    e.target.select();
+  };
+
+  const handleBlur = () => {
+    setIsFocused(false);
+    commitValue();
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.currentTarget.blur();
+    }
+  };
 
   return (
     <div className={`flex items-center gap-2 ${className}`}>
@@ -49,20 +88,14 @@ export default function NumberStepper({
         -
       </button>
       <input
-        type="number"
-        value={displayedValue} // Use displayedValue for formatting
-        onChange={(e) => {
-          const parsedValue = parseFloat(e.target.value);
-          if (!isNaN(parsedValue)) {
-            onChange(roundValue(parsedValue));
-          } else {
-            onChange(0); // Default to 0 or handle as per design
-          }
-        }}
+        type="text"
+        inputMode="decimal"
+        value={localValue}
+        onChange={(e) => setLocalValue(e.target.value)}
+        onFocus={handleFocus}
+        onBlur={handleBlur}
+        onKeyDown={handleKeyDown}
         className="w-20 p-2 text-center bg-white text-gray-900 rounded-lg text-lg font-semibold"
-        min={min}
-        max={max}
-        step={step} // Ensure step is passed to input for browser controls if any
       />
       <button
         type="button"
