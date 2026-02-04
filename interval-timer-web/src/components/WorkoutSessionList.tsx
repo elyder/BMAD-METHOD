@@ -79,7 +79,7 @@ export default function WorkoutSessionList() {
   return (
     <div className="w-full">
       <header className="flex justify-between items-center mb-6">
-        <h2 className="text-3xl font-bold">{t('your_sessions')}</h2>
+        <h1 className="text-4xl sm:text-5xl font-bold">{t('your_sessions')}</h1>
         <Link href="/session/edit/new" className="px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 text-xl font-semibold">
           {t('create_new')}
         </Link>
