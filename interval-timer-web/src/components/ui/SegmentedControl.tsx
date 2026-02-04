@@ -20,7 +20,7 @@ export default function SegmentedControl<T extends string>({
   return (
     <div
       className={`grid items-center p-1 bg-gray-700 rounded-lg w-full ${className}`}
-      style={{ gridTemplateColumns: `repeat(${options.length}, minmax(0, 1fr))` }}
+      style={{ gridTemplateColumns: `repeat(${options.length}, minmax(auto, 1fr))` }}
     >
       {options.map((option) => (
         <button
