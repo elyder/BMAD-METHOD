@@ -223,39 +223,46 @@ export default function RunSessionPage({ params }: { params: Promise<{ id: strin
     return `${minutes}:${seconds}`;
   };
 
+  const getContrastColor = (hexColor: string): string => {
+    const hex = hexColor.replace('#', '');
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
+    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+    return luminance > 0.5 ? '#111827' : '#ffffff';
+  };
+
+  const nameColor = status === 'running' ? getContrastColor(currentStep.color) : '#ffffff';
+
   return (
     <div ref={containerRef} className="w-full h-screen flex flex-col items-center justify-center bg-gray-900 text-white p-4" style={{backgroundColor: status === 'running' ? currentStep.color : '#111827'}}>
-        
-        <div className="w-full max-w-xl mb-4">
-            <div className="flex justify-between text-2xl">
-                <span>{session.name}</span>
-                <span>{formatTime(timeElapsed)} / {formatTime(totalTime)}</span>
-            </div>
-            <div className="w-full bg-gray-700 rounded-full h-5 overflow-hidden">
-                <div className="bg-blue-500 h-5 rounded-full" style={{ width: `${progressPercent}%` }}></div>
-            </div>
+
+        {/* Session name - centered at top, disconnected from progress bar */}
+        <div className="w-full max-w-xl mb-4 text-center">
+            <span className="text-5xl" style={{color: nameColor}}>{session.name}</span>
         </div>
 
-        {/* New Container for Text Content */}
-        <div className="relative flex flex-col items-center justify-center bg-gray-800 text-white p-8 rounded-lg shadow-lg max-w-xl w-full" style={{height: '60vh'}}>
+        {/* Grey box */}
+        <div className="relative flex flex-col bg-gray-800 text-white p-8 rounded-lg shadow-lg max-w-xl w-full" style={{height: '75vh'}}>
             {currentStep.item.sets > 1 && (
                 <p className="absolute top-4 right-4 text-xl text-gray-300">{t('set_of', { current: currentStep.set, total: currentStep.item.sets })}</p>
             )}
+
             {/* Main Timer Display */}
-            <div className="text-center w-full">
+            <div className="flex-1 flex flex-col items-center justify-center text-center w-full">
                 {currentStep.description && <p className="text-5xl text-white mt-2 mb-16">{currentStep.description}</p>}
-                
-                {/* Speed, Pace, Incline */}
-                <div className="w-full text-2xl text-gray-300 mt-4">
+
+                {/* Pace (left), Speed (center, larger), Incline (right) */}
+                <div className="w-full text-2xl mt-4">
                     <div className="flex justify-between items-center">
                         <div className="w-1/3 text-left">
-                            {currentStep.speed > 0 && <span>{currentStep.speed} km/t</span>}
+                            {(currentStep.speed > 0 && session.showPace) && <span>{calculatePace(currentStep.speed)}/km</span>}
                         </div>
                         <div className="w-1/3 text-center">
-                            {(currentStep.speed > 0 && session.showPace) && <span className="text-lg text-gray-500">({calculatePace(currentStep.speed)}/km)</span>}
+                            {currentStep.speed > 0 && <span className="text-5xl">{currentStep.speed} km/t</span>}
                         </div>
                         <div className="w-1/3 text-right">
-                            {currentStep.incline > 0 && <span>{currentStep.incline}% {t('incline')}</span>}
+                            <span>{currentStep.incline}%</span>
                         </div>
                     </div>
                 </div>
@@ -265,16 +272,31 @@ export default function RunSessionPage({ params }: { params: Promise<{ id: strin
                 </div>
             </div>
 
-            {/* Next Up */}
-            {nextStep && (
-                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-center text-gray-500">
-                    <p className="text-2xl">{t('next_up')}: {nextStep.description || nextStep.itemName}</p>
-                    <p className="text-2xl">
-                        {nextStep.speed > 0 && <span>{nextStep.speed} km/t</span>}
-                        {nextStep.incline > 0 && <span className="ml-2">{nextStep.incline}% {t('incline')}</span>}
-                    </p>
+            {/* Progress bar inside grey box with downcounter */}
+            <div className="w-full mb-3">
+                <div className="flex justify-end text-4xl mb-1">
+                    <span>{formatTime(totalTime - timeElapsed)}</span>
                 </div>
-            )}
+                <div className="w-full bg-gray-700 rounded-full h-5 overflow-hidden">
+                    <div className="bg-blue-500 h-5 rounded-full" style={{ width: `${progressPercent}%` }}></div>
+                </div>
+            </div>
+
+            {/* Next Up */}
+            <div className="text-center text-white">
+                <p className="text-2xl">{t('next_up')}:</p>
+                {nextStep ? (
+                    <>
+                        <p className="text-5xl">{nextStep.description || nextStep.itemName}</p>
+                        <p className="text-3xl">
+                            {nextStep.speed > 0 && <span>{nextStep.speed} km/t</span>}
+                            <span className="ml-2">{nextStep.incline}%</span>
+                        </p>
+                    </>
+                ) : (
+                    <p className="text-5xl">{t('finished')}</p>
+                )}
+            </div>
         </div>
 
         {/* Controls */}
@@ -297,7 +319,7 @@ export default function RunSessionPage({ params }: { params: Promise<{ id: strin
         
         {status === 'countdown' && countdownDisplay !== null && (
             <div className="absolute inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-                <h2 className="text-9xl font-bold">{countdownDisplay}</h2>
+                <h2 className="text-5xl">{countdownDisplay}</h2>
             </div>
         )}
 
