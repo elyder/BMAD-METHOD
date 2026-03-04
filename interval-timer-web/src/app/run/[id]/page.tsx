@@ -23,8 +23,35 @@ interface WorkoutStep {
 
 export default function RunSessionPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const router = useRouter();
+  const upliftingMessages = {
+    en: [
+      "Every session counts, even the tough ones — and you just finished one. That's something to be proud of.",
+      "It doesn't have to feel easy to be worth it. You showed up today, and that's what progress looks like.",
+      "The hardest part was starting, and you did that. Everything after that was just you proving yourself right.",
+      "Some days the body fights back — but you kept going anyway. That kind of grit is what builds lasting strength.",
+      "You may not feel it right now, but finishing this workout made you a little better than yesterday.",
+      "Not every session will feel great, but every session moves you forward. Today was no exception.",
+      "The fact that you pushed through when it got hard says everything about who you are becoming.",
+      "Progress isn't always loud or easy — sometimes it's quiet and hard, just like today. Well done.",
+      "You gave what you had today, and that is always enough. Rest up and come back even stronger.",
+      "The version of you that almost skipped this workout is grateful you didn't. Keep going.",
+    ],
+    no: [
+      "Hver økt teller, selv de tøffe — og du fullførte akkurat en. Det er det verdt å være stolt av.",
+      "Det trenger ikke føles lett for å være verdt det. Du møtte opp i dag, og det er slik fremgang ser ut.",
+      "Det vanskeligste var å begynne, og det gjorde du. Alt etterpå var bare deg som beviste at du hadde rett.",
+      "Noen dager kjemper kroppen imot — men du fortsatte likevel. Den typen utholdenhet bygger varig styrke.",
+      "Du merker det kanskje ikke nå, men du ble litt bedre enn i går etter denne økten.",
+      "Ikke alle økter vil føles bra, men alle økter tar deg fremover. I dag var intet unntak.",
+      "Det at du presset deg gjennom da det ble tøft sier alt om hvem du er i ferd med å bli.",
+      "Fremgang er ikke alltid høylytt eller lett — noen ganger er den stille og hard, akkurat som i dag. Bra jobbet.",
+      "Du ga det du hadde i dag, og det er alltid nok. Hvil godt og kom tilbake enda sterkere.",
+      "Den versjonen av deg som nesten hoppet over denne økten er glad for at du ikke gjorde det. Fortsett.",
+    ],
+  };
+
   const [session, setSession] = useState<WorkoutSession | null>(null);
   const [status, setStatus] = useState<TimerStatus>('idle');
   const [countdownDisplay, setCountdownDisplay] = useState<number | null>(null);
@@ -33,6 +60,10 @@ export default function RunSessionPage({ params }: { params: Promise<{ id: strin
   const [timeRemaining, setTimeRemaining] = useState(0);
   const [totalTime, setTotalTime] = useState(0);
   const [timeElapsed, setTimeElapsed] = useState(0);
+  const [completionMessage] = useState(() => {
+    const messages = upliftingMessages[language] ?? upliftingMessages.en;
+    return messages[Math.floor(Math.random() * messages.length)];
+  });
 
   const containerRef = useRef<HTMLDivElement>(null);
   const endAudioRef = useRef<HTMLAudioElement | null>(null);
@@ -239,18 +270,23 @@ export default function RunSessionPage({ params }: { params: Promise<{ id: strin
 
         {/* Session name - centered at top, disconnected from progress bar */}
         <div className="w-full max-w-xl mb-4 text-center">
-            <span className="text-5xl" style={{color: nameColor}}>{session.name}</span>
+            <span className="text-4xl" style={{color: nameColor}}>{session.name}</span>
         </div>
 
         {/* Grey box */}
-        <div className="relative flex flex-col bg-gray-800 text-white p-8 rounded-lg shadow-lg max-w-xl w-full" style={{height: '75vh'}}>
+        <div className="relative flex flex-col bg-gray-800 text-white p-8 rounded-lg shadow-lg max-w-xl w-full" style={{height: '72vh'}}>
             {currentStep.item.sets > 1 && (
-                <p className="absolute top-4 right-4 text-xl text-gray-300">{t('set_of', { current: currentStep.set, total: currentStep.item.sets })}</p>
+                <p className="absolute top-4 right-4 text-3xl text-gray-300">{t('set_of', { current: currentStep.set, total: currentStep.item.sets })}</p>
             )}
 
             {/* Main Timer Display */}
             <div className="flex-1 flex flex-col items-center justify-center text-center w-full">
-                {currentStep.description && <p className="text-5xl text-white mt-2 mb-16">{currentStep.description}</p>}
+                {currentStep.description && (
+                    <div className="text-5xl text-white mt-2 mb-16">
+                        <p>{currentStep.description.split('\n')[0]}</p>
+                        <p className="text-4xl">{currentStep.description.split('\n')[1] ?? <>&nbsp;</>}</p>
+                    </div>
+                )}
 
                 {/* Pace (left), Speed (center, larger), Incline (right) */}
                 <div className="w-full text-2xl mt-4">
@@ -267,15 +303,16 @@ export default function RunSessionPage({ params }: { params: Promise<{ id: strin
                     </div>
                 </div>
 
-                <div className="text-9xl font-mono my-8">
+                <div className="text-9xl font-mono my-5">
                     {formatTime(timeRemaining)}
                 </div>
             </div>
 
             {/* Progress bar inside grey box with downcounter */}
             <div className="w-full mb-3">
-                <div className="flex justify-end text-4xl mb-1">
-                    <span>{formatTime(totalTime - timeElapsed)}</span>
+                <div className="flex justify-between text-3xl mb-1">
+                    <span className="font-mono">{formatTime(totalTime - timeElapsed)}</span>
+                    <span className="font-mono">{formatTime(totalTime)}</span>
                 </div>
                 <div className="w-full bg-gray-700 rounded-full h-5 overflow-hidden">
                     <div className="bg-blue-500 h-5 rounded-full" style={{ width: `${progressPercent}%` }}></div>
@@ -283,18 +320,21 @@ export default function RunSessionPage({ params }: { params: Promise<{ id: strin
             </div>
 
             {/* Next Up */}
-            <div className="text-center text-white">
+            <div className={`text-center text-white ${status === 'idle' || status === 'countdown' ? 'invisible' : ''}`}>
                 <p className="text-2xl">{t('next_up')}:</p>
                 {nextStep ? (
                     <>
-                        <p className="text-5xl">{nextStep.description || nextStep.itemName}</p>
+                        <p className="text-5xl py-2">{(nextStep.description || nextStep.itemName).split('\n')[0]}</p>
                         <p className="text-3xl">
                             {nextStep.speed > 0 && <span>{nextStep.speed} km/t</span>}
-                            <span className="ml-2">{nextStep.incline}%</span>
+                            <span className="ml-8">{nextStep.incline}%</span>
                         </p>
                     </>
                 ) : (
-                    <p className="text-5xl">{t('finished')}</p>
+                    <>
+                        <p className="text-5xl py-2">{t('finished')}</p>
+                        <p className="text-3xl invisible">-</p>
+                    </>
                 )}
             </div>
         </div>
@@ -304,8 +344,8 @@ export default function RunSessionPage({ params }: { params: Promise<{ id: strin
             {status === 'idle' && <button onClick={startTimer} className="px-8 py-3 bg-green-500 rounded-lg text-xl font-bold">{t('start')}</button>}
             {status === 'running' &&
                 <>
-                    <button onClick={pauseTimer} className="px-8 py-3 bg-yellow-500 rounded-lg text-xl">{t('pause')}</button>
-                    <button onClick={skip} className="px-8 py-3 bg-gray-600 rounded-lg text-xl">{t('next')}</button>
+                    <button onClick={pauseTimer} className="px-8 py-3 bg-yellow-500 rounded-lg text-xl border-2 border-gray-700">{t('pause')}</button>
+                    <button onClick={skip} className="px-8 py-3 bg-gray-600 rounded-lg text-xl border-2 border-gray-700">{t('next')}</button>
                 </>
             }
             {status === 'paused' &&
@@ -319,13 +359,14 @@ export default function RunSessionPage({ params }: { params: Promise<{ id: strin
         
         {status === 'countdown' && countdownDisplay !== null && (
             <div className="absolute inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-                <h2 className="text-5xl">{countdownDisplay}</h2>
+                <h2 key={countdownDisplay} className="countdown-fade" style={{fontSize: '50vw', lineHeight: 1}}>{countdownDisplay}</h2>
             </div>
         )}
 
         {status === 'finished' && (
             <div className="absolute inset-0 bg-black bg-opacity-80 flex flex-col justify-center items-center">
                 <h2 className="text-5xl font-bold">{t('workout_complete')}</h2>
+                <p className="text-3xl mt-4 text-gray-300">{completionMessage}</p>
                 <button onClick={() => router.push('/')} className="mt-8 px-8 py-4 bg-blue-500 rounded-lg text-2xl">{t('back_to_home')}</button>
             </div>
         )}

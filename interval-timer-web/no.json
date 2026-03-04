@@ -38,7 +38,7 @@
   "session_not_found": "Økt ikke funnet!",
   "end_session_confirm": "Er du sikker på at du vil avslutte denne økten?",
   "loading_session": "Laster økt...",
-  "set_of": "Sett {current} av {total}",
+  "set_of": "{current} av {total}",
   "next_up": "Neste",
   "finished": "Ferdig",
   "start": "START",

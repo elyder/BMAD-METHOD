@@ -38,7 +38,7 @@
   "session_not_found": "Session not found!",
   "end_session_confirm": "Are you sure you want to end this session?",
   "loading_session": "Loading Session...",
-  "set_of": "Set {current} of {total}",
+  "set_of": "{current} of {total}",
   "next_up": "Next up",
   "finished": "Finished",
   "start": "START",
