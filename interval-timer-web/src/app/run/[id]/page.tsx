@@ -341,7 +341,12 @@ export default function RunSessionPage({ params }: { params: Promise<{ id: strin
 
         {/* Controls */}
         <div className="flex gap-4 mt-8">
-            {status === 'idle' && <button onClick={startTimer} className="px-8 py-3 bg-green-500 rounded-lg text-xl font-bold">{t('start')}</button>}
+            {status === 'idle' && (
+                <>
+                    <button onClick={startTimer} className="px-8 py-3 bg-green-500 rounded-lg text-xl font-bold">{t('start')}</button>
+                    <button onClick={() => router.push('/')} className="px-8 py-3 bg-gray-600 rounded-lg text-xl">{t('cancel')}</button>
+                </>
+            )}
             {status === 'running' &&
                 <>
                     <button onClick={pauseTimer} className="px-8 py-3 bg-yellow-500 rounded-lg text-xl border-2 border-gray-700">{t('pause')}</button>
@@ -366,7 +371,11 @@ export default function RunSessionPage({ params }: { params: Promise<{ id: strin
         {status === 'finished' && (
             <div className="absolute inset-0 bg-black bg-opacity-80 flex flex-col justify-center items-center">
                 <h2 className="text-5xl font-bold">{t('workout_complete')}</h2>
-                <p className="text-3xl mt-4 text-gray-300">{completionMessage}</p>
+                <div className="text-3xl mt-4 text-gray-300 text-center px-8">
+                    {completionMessage.split('. ').map((sentence, i, arr) => (
+                        <p key={i}>{sentence}{i < arr.length - 1 ? '.' : ''}</p>
+                    ))}
+                </div>
                 <button onClick={() => router.push('/')} className="mt-8 px-8 py-4 bg-blue-500 rounded-lg text-2xl">{t('back_to_home')}</button>
             </div>
         )}
